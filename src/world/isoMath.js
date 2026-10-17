@@ -1,9 +1,11 @@
-import { TILE, CAMERA_MODE } from '../config/constants.js';
+import { TILE } from '../config/constants.js';
 
 export const PROJECTION_MODE = {
-  ISOMETRIC: CAMERA_MODE?.ISOMETRIC ?? 'isometric',
-  TOPDOWN: CAMERA_MODE?.TOPDOWN ?? 'topdown'
+  ISOMETRIC: 'isometric',
+  TOPDOWN: 'topdown'
 };
+
+export const CAMERA_MODE = PROJECTION_MODE;
 
 let currentProjectionMode = PROJECTION_MODE.ISOMETRIC;
 
