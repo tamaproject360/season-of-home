@@ -1,0 +1,19 @@
+{
+  "name": "soh",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "node tests/isoMath.test.js && node tests/inventory.test.js && node tests/farming.test.js && node tests/quests.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "phaser": "^3.88.2"
+  },
+  "type": "module"
+}

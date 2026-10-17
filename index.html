@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Seasons of Home — Lembah Rimbun</title>
+  <link rel="stylesheet" href="src/styles/tokens.css">
+  <link rel="stylesheet" href="src/styles/ui.css">
+  <!-- Offline-first Phaser 3.88.2 with CDN fallback -->
+  <script src="lib/phaser.min.js"></script>
+  <script>
+    if (typeof Phaser === 'undefined') {
+      console.warn('[Bootstrap] Local Phaser not found, attempting CDN fallback...');
+      document.write('<script src="https://cdn.jsdelivr.net/npm/phaser@3.88.2/dist/phaser.min.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+  <div id="app-container">
+    <!-- Storage & capability banner -->
+    <div id="system-banner">Inisialisasi sistem...</div>
+
+    <!-- Phaser Canvas Container -->
+    <div id="game-container"></div>
+
+    <!-- Touch Controls for Mobile Devices -->
+    <div id="touch-overlay">
+      <div id="virtual-dpad" class="touch-control">
+        <button id="dpad-up-left" class="dpad-btn" aria-label="Atas Kiri">↖</button>
+        <button id="dpad-up" class="dpad-btn" aria-label="Atas">▲</button>
+        <button id="dpad-up-right" class="dpad-btn" aria-label="Atas Kanan">↗</button>
+        <button id="dpad-left" class="dpad-btn" aria-label="Kiri">◀</button>
+        <div class="dpad-center"></div>
+        <button id="dpad-right" class="dpad-btn" aria-label="Kanan">▶</button>
+        <button id="dpad-down-left" class="dpad-btn" aria-label="Bawah Kiri">↙</button>
+        <button id="dpad-down" class="dpad-btn" aria-label="Bawah">▼</button>
+        <button id="dpad-down-right" class="dpad-btn" aria-label="Bawah Kanan">↘</button>
+      </div>
+
+      <div id="action-buttons" class="touch-control">
+        <button id="btn-action" class="touch-action-btn" aria-label="Tombol Aksi">AKSI</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main ES Module Bootstrap -->
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

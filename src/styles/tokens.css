@@ -1,0 +1,33 @@
+:root {
+  /* Curated Earthy Palette (Blueprint Section 5.5) */
+  --color-deep-pine: #304B43;
+  --color-moss: #4C6B55;
+  --color-sage: #76936B;
+  --color-dry-grass: #A6AB78;
+  --color-warm-cream: #EEE1C4;
+  --color-clay-brown: #87674E;
+  --color-soil: #59483B;
+  --color-terracotta: #BC7654;
+  --color-golden-straw: #D9AE6B;
+  --color-stone-slate: #697A77;
+  --color-pond-blue: #749C9A;
+  --color-night-blue: #354D5C;
+  --color-ui-ink: #2D3835;
+  --color-ui-parchment: #F2E8D5;
+  
+  /* Semantic UI tokens */
+  --ui-bg: var(--color-ui-parchment);
+  --ui-border: var(--color-clay-brown);
+  --ui-text: var(--color-ui-ink);
+  --ui-btn-primary: var(--color-terracotta);
+  --ui-btn-primary-hover: #9E5D40;
+  --ui-btn-text: var(--color-warm-cream);
+  --ui-accent: var(--color-golden-straw);
+
+  /* Fonts & Scale */
+  --font-family-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-size-base: 15px;
+  --font-size-sm: 13px;
+  --font-size-lg: 18px;
+  --font-size-title: 24px;
+}
