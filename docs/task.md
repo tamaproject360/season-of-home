@@ -1,8 +1,8 @@
 # Checkpoint Pengembangan: Seasons of Home
 
-- **Daftar Tugas Kanonikal:** [task.md](../task.md) (104/104 tugas Selesai - Phase 0 s/d Phase 6)
-- **Spesifikasi Arsitektur:** [docs/specs.md](specs.md)
-- **Status Rilis:** Siap Produksi (v0.6.0)
+- **Daftar Tugas Kanonikal:** [task.md](../task.md) (104/116 tugas Selesai - Phase 7 Aktif)
+- **Spesifikasi Arsitektur:** [docs/specs.md](specs.md) | [Spesifikasi Multi-Zona & Cangkul Dinamis](superpowers/specs/2026-10-17-multi-zone-and-dynamic-farming-design.md)
+- **Status Rilis:** Pengembangan Phase 7 (Multi-Zone & Free-Form Dynamic Farming)
 
 ## Ringkasan Pencapaian Seluruh Fase:
 
@@ -39,3 +39,9 @@
    - Canvas responsif penuh menggunakan `Phaser.Scale.RESIZE`, adaptasi zoom kamera responsif, dan pemisahan hotbar/D-pad pada mode mobile portrait.
    - Script bundler mandiri `scripts/build.mjs` dan server preview `scripts/serve.mjs`.
    - 100% lulus 11 test suite unit otomatis (`npm test`) dan uji standalone build (`npm run test:build`).
+
+6. **Phase 7 — Multi-Zone World Partitioning & Dynamic Free-Form Farming (Aktif):**
+   - Pembagian 5 zona tematik mandiri: Kebun Joni (`zone_farm`), Interior Rumah (`zone_cottage_interior`), Pasar & Desa (`zone_village`), Danau Lembah (`zone_lake`), dan Kaki Gunung & Gua Tambang (`zone_mountain_mine`).
+   - Sistem cangkul bebas tanpa batas petak statis: pemain dapat mencangkul petak mana saja di kebun Joni (`[E] Cangkul Tanah`) untuk memperluas lahan pertanian sesuka hati.
+   - Transisi halus antar-zona dengan efek kamera fade-out/fade-in (200ms) dan pemindahan posisi pemain.
+   - Persistensi status seluruh petak dinamis dan zona aktif pada IndexedDB.
