@@ -1,5 +1,4 @@
 import { getItemDefinition } from '../data/items.js';
-import { EventBus, EVENTS } from '../utils/EventBus.js';
 
 /**
  * HUDController
@@ -44,9 +43,6 @@ export class HUDController {
         </div>
       </div>
       <div class="hud-group">
-        <button id="btn-camera-angle" class="hud-btn" title="Ganti Sudut Kamera (C)" style="margin-right:6px;">
-          <span id="hud-camera-text">📷 [C] ISO</span>
-        </button>
         <button id="btn-open-journal" class="hud-btn" title="Buka Jurnal Misi (J)" style="margin-right:6px;">
           <span>Jurnal [J]</span>
         </button>
@@ -134,20 +130,6 @@ export class HUDController {
       }
     };
     window.addEventListener('keydown', this.keyHandler);
-
-    // Camera angle toggle button
-    const btnCamera = this.hudElement.querySelector('#btn-camera-angle');
-    if (btnCamera) {
-      btnCamera.addEventListener('click', () => {
-        if (typeof this.onCameraToggleCallback === 'function') {
-          this.onCameraToggleCallback();
-        }
-      });
-    }
-
-    this.unsubscribeCamera = EventBus.on(EVENTS.CAMERA_ANGLE_CHANGED, ({ mode }) => {
-      this.setCameraModeDisplay(mode);
-    });
   }
 
   setActiveHotbarSlot(index) {
@@ -288,22 +270,10 @@ export class HUDController {
     }, 2800);
   }
 
-  onCameraToggle(callback) {
-    this.onCameraToggleCallback = callback;
-  }
-
-  setCameraModeDisplay(mode) {
-    const text = document.getElementById('hud-camera-text');
-    if (text) {
-      text.textContent = mode === 'topdown' ? '📷 [C] TOP' : '📷 [C] ISO';
-    }
-  }
-
   destroy() {
     this.unsubscribeTick?.();
     this.unsubscribeDay?.();
     this.unsubscribeInventory?.();
-    this.unsubscribeCamera?.();
     window.removeEventListener('keydown', this.keyHandler);
     if (this.hudElement) this.hudElement.remove();
     if (this.hotbarElement) this.hotbarElement.remove();

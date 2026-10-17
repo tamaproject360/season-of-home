@@ -45,9 +45,6 @@ export class UIScene extends Phaser.Scene {
     this.hudController.updateCoinsDisplay(this.gameScene.wallet.coins);
     this.hudController.setSaveStatus({ state: StorageRepo.usingFallback ? 'session' : 'saved',
       message: StorageRepo.usingFallback ? 'Progres hanya sesi ini' : this.gameScene.saveData.revision ? 'Tersimpan' : 'Belum tersimpan' });
-    this.hudController.onCameraToggle(() => {
-      this.gameScene?.toggleCameraAngle?.();
-    });
 
     // 2. Initialize Menu Controller with input freeze callback & questSystem
     this.menuController = new MenuController(

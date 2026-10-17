@@ -177,23 +177,6 @@ export class FarmPlot {
     this.updateVisuals();
   }
 
-  updateProjection(mode) {
-    const screenPos = tileToScreen(this.tileX, this.tileY, 0, 0, mode);
-    this.x = screenPos.x;
-    this.y = screenPos.y;
-    if (this.plotSprite) {
-      this.plotSprite.setPosition(this.x, this.y);
-      if (mode === 'topdown') {
-        this.plotSprite.setDisplaySize(48, 48);
-      } else {
-        this.plotSprite.setDisplaySize(64, 41);
-      }
-    }
-    if (this.cropSprite) {
-      this.cropSprite.setPosition(this.x, this.y - 6);
-    }
-  }
-
   destroy() {
     if (this.plotSprite) this.plotSprite.destroy();
     if (this.cropSprite) this.cropSprite.destroy();

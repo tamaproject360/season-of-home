@@ -4,7 +4,7 @@ import { FarmPlot } from '../entities/FarmPlot.js';
 
 /**
  * IsoWorldRenderer
- * Renders isometric and top-down terrain, buildings, vegetation, and manages occlusion.
+ * Renders isometric terrain, buildings, vegetation, and manages occlusion.
  */
 export class IsoWorldRenderer {
   constructor(scene, navGrid, depthSorter) {
@@ -13,19 +13,9 @@ export class IsoWorldRenderer {
     this.depthSorter = depthSorter;
     this.groundTiles = [];
     this.props = [];
-    this.groundElements = [];
-    this.roadElements = [];
-    this.buildingElements = [];
-    this.treeElements = [];
-    this.roadGraphics = null;
-    this.zoneDef = null;
-    this.farmingSystem = null;
   }
 
   buildZone(zoneDef, farmingSystem = null) {
-    this.zoneDef = zoneDef;
-    this.farmingSystem = farmingSystem;
-
     // Reuse the earthy pixels of the source path, but clip a complete diamond.
     // The source stripe itself cannot connect along both isometric axes.
     for (const [key, sourceKey, sampleY] of [
@@ -61,7 +51,6 @@ export class IsoWorldRenderer {
           water.setDisplaySize(TILE.WIDTH + 0.2, TILE.HEIGHT + 0.2);
           water.setDepth(15);
           this.groundTiles.push(water);
-          this.groundElements.push({ sprite: water, tx, ty, isWater: true });
           this.navGrid.setSolid(tx, ty, true);
         } else {
           // Base grass terrain tile
@@ -70,14 +59,14 @@ export class IsoWorldRenderer {
           grass.setDisplaySize(64, 38);
           grass.setDepth(10);
           this.groundTiles.push(grass);
-          this.groundElements.push({ sprite: grass, tx, ty, isWater: false });
+
         }
       }
     }
 
-    // Connected dirt surfaces
+    // Connected dirt surfaces rather than reusing a horizontal stripe on every
+    // diagonal tile. Only the outside of a road receives an edge, never its seams.
     const roads = this.scene.add.graphics().setDepth(21);
-    this.roadGraphics = roads;
     for (let ty = 0; ty < zoneDef.height; ty++) {
       for (let tx = 0; tx < zoneDef.width; tx++) {
         if (!zoneDef.isPath(tx, ty) || zoneDef.isWater(tx, ty)) continue;
@@ -93,8 +82,6 @@ export class IsoWorldRenderer {
         path.setDepth(20);
         if (!zoneDef.isPlaza?.(tx, ty)) path.setTint(0xEBDFCC);
         this.groundTiles.push(path);
-        this.roadElements.push({ sprite: path, tx, ty, isPlaza: zoneDef.isPlaza?.(tx, ty) });
-
         const neighbours = [[0, -1], [1, 0], [0, 1], [-1, 0]];
         roads.lineStyle(1, 0x796B4C, 0.85);
         neighbours.forEach(([dx, dy], index) => {
@@ -130,9 +117,10 @@ export class IsoWorldRenderer {
     for (const bldg of zoneDef.buildings) {
       const centerTileX = bldg.tileX + bldg.footprintW / 2;
       const centerTileY = bldg.tileY + bldg.footprintH / 2;
-      const renderTileX = bldg.renderAnchor?.tileX ?? centerTileX;
-      const renderTileY = bldg.renderAnchor?.tileY ?? centerTileY;
-      const screenPos = tileToScreen(renderTileX, renderTileY);
+      const screenPos = tileToScreen(
+        bldg.renderAnchor?.tileX ?? centerTileX,
+        bldg.renderAnchor?.tileY ?? centerTileY
+      );
 
       const sprite = this.scene.add.image(screenPos.x, screenPos.y, bldg.textureKey);
       const origin = bldg.origin || { x: 0.5, y: 0.90 };
@@ -163,7 +151,6 @@ export class IsoWorldRenderer {
       this.props.push(propObj);
 
       // Small hanging props inherit their building's position and occlusion.
-      const attachedProps = [];
       for (const attachment of bldg.attachments || []) {
         const left = sprite.x - sprite.displayWidth * origin.x;
         const top = sprite.y - sprite.displayHeight * origin.y;
@@ -177,20 +164,7 @@ export class IsoWorldRenderer {
         const attachedProp = { sprite: decor, active: true, getFootY: () => footY + 1 };
         this.depthSorter.register(attachedProp);
         this.props.push(attachedProp);
-        attachedProps.push({ sprite: decor, config: attachment, propObj: attachedProp });
       }
-
-      this.buildingElements.push({
-        sprite,
-        bldg,
-        centerTileX,
-        centerTileY,
-        renderTileX,
-        renderTileY,
-        origin,
-        propObj,
-        attachments: attachedProps
-      });
     }
 
     // 4. Render Trees, Foliage, Ore Nodes, Logs & Lanterns
@@ -242,119 +216,6 @@ export class IsoWorldRenderer {
       };
       this.depthSorter.register(propObj);
       this.props.push(propObj);
-
-      this.treeElements.push({
-        sprite,
-        propObj,
-        tree,
-        originY,
-        offsetY: tree.offsetY || 0
-      });
-    }
-  }
-
-  /**
-   * Refresh all rendered world elements when camera projection mode changes.
-   * @param {'isometric' | 'topdown'} mode
-   */
-  refreshProjection(mode) {
-    if (!this.zoneDef) return;
-    const isTopDown = mode === 'topdown';
-    const orthoSize = TILE.ORTHO_SIZE || 48;
-
-    // 1. Reposition Ground Terrain Tiles
-    for (const elem of this.groundElements) {
-      const pos = tileToScreen(elem.tx, elem.ty, 0, 0, mode);
-      elem.sprite.setPosition(pos.x, pos.y);
-      if (isTopDown) {
-        elem.sprite.setDisplaySize(orthoSize + 0.2, orthoSize + 0.2);
-      } else {
-        if (elem.isWater) {
-          elem.sprite.setDisplaySize(TILE.WIDTH + 0.2, TILE.HEIGHT + 0.2);
-        } else {
-          elem.sprite.setDisplaySize(64, 38);
-        }
-      }
-    }
-
-    // 2. Reposition Road Tiles and Redraw Borders
-    if (this.roadGraphics) {
-      this.roadGraphics.clear();
-      this.roadGraphics.lineStyle(1, 0x796B4C, 0.85);
-
-      for (const elem of this.roadElements) {
-        const pos = tileToScreen(elem.tx, elem.ty, 0, 0, mode);
-        elem.sprite.setPosition(pos.x, pos.y);
-
-        if (isTopDown) {
-          elem.sprite.setDisplaySize(orthoSize, orthoSize);
-          const half = orthoSize / 2;
-          const corners = [
-            { x: pos.x, y: pos.y - half },
-            { x: pos.x + half, y: pos.y },
-            { x: pos.x, y: pos.y + half },
-            { x: pos.x - half, y: pos.y }
-          ];
-          const neighbours = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-          neighbours.forEach(([dx, dy], index) => {
-            if (!this.zoneDef.isPath(elem.tx + dx, elem.ty + dy)) {
-              const a = corners[index];
-              const b = corners[(index + 1) % 4];
-              this.roadGraphics.lineBetween(a.x, a.y, b.x, b.y);
-            }
-          });
-        } else {
-          elem.sprite.setDisplaySize(TILE.WIDTH, TILE.HEIGHT);
-          const corners = [
-            { x: pos.x, y: pos.y - TILE.HEIGHT / 2 },
-            { x: pos.x + TILE.WIDTH / 2, y: pos.y },
-            { x: pos.x, y: pos.y + TILE.HEIGHT / 2 },
-            { x: pos.x - TILE.WIDTH / 2, y: pos.y }
-          ];
-          const neighbours = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-          neighbours.forEach(([dx, dy], index) => {
-            if (!this.zoneDef.isPath(elem.tx + dx, elem.ty + dy)) {
-              const a = corners[index];
-              const b = corners[(index + 1) % 4];
-              this.roadGraphics.lineBetween(a.x, a.y, b.x, b.y);
-            }
-          });
-        }
-      }
-    }
-
-    // 3. Reposition Farm Plots
-    if (this.farmingSystem) {
-      for (const plot of this.farmingSystem.plots.values()) {
-        if (typeof plot.updateProjection === 'function') {
-          plot.updateProjection(mode);
-        }
-      }
-    }
-
-    // 4. Reposition Buildings and Attached Decorations
-    for (const elem of this.buildingElements) {
-      const pos = tileToScreen(elem.renderTileX, elem.renderTileY, 0, 0, mode);
-      elem.sprite.setPosition(pos.x, pos.y);
-      const footY = tileToScreen(elem.centerTileX, elem.bldg.tileY + elem.bldg.footprintH, 0, 0, mode).y;
-      elem.propObj.getFootY = () => footY;
-
-      for (const att of elem.attachments) {
-        const left = elem.sprite.x - elem.sprite.displayWidth * elem.origin.x;
-        const top = elem.sprite.y - elem.sprite.displayHeight * elem.origin.y;
-        att.sprite.setPosition(
-          left + elem.sprite.displayWidth * att.config.x,
-          top + elem.sprite.displayHeight * att.config.y
-        );
-        att.propObj.getFootY = () => footY + 1;
-      }
-    }
-
-    // 5. Reposition Trees, Foliage, and Resource Nodes
-    for (const elem of this.treeElements) {
-      const pos = tileToScreen(elem.tree.tileX, elem.tree.tileY, 0, 0, mode);
-      elem.sprite.setPosition(pos.x, pos.y - (elem.offsetY || 0));
-      elem.propObj.getFootY = () => pos.y;
     }
   }
 }

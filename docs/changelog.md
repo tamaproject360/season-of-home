@@ -12,5 +12,4 @@
 - Phase 6 selesai: Web Audio API procedural synthesizer (autoplay-safe), live volume slider persistence, standalone build scripts (`scripts/build.mjs`, `scripts/serve.mjs`), dan lulus 100% 11 unit test suites + build test.
 - Pembaruan dokumen kanonikal: `task.md` (104/104 tugas Selesai), `docs/specs.md` (arsitektur menyeluruh, alur kerja dan model data Mermaid, konvensi kode, pedoman repository), `README.md` (standar industri, badge, matriks fitur lengkap, panduan kontrol dan pengujian), serta `docs/task.md`.
 - Penambahan JSDoc typing pada modul persistence, transaction, settings, serta fallback portrait aman pada `DialoguePanel.js` untuk mencegah warning gambar kosong di browser.
-- Penambahan fitur Dynamic Camera Angle (Isometrik 2:1 & Top-Down Ortogonal 2D) dengan shortcut keyboard `C`, tombol HUD toggle `📷 [C] ISO / TOP`, sinkronisasi matematis proyeksi ubin dan entitas, serta verifikasi unit test invariant.
-- Perbaikan Uncaught SyntaxError import CAMERA_MODE pada `src/world/isoMath.js` (didefinisikan mandiri tanpa dependensi named export eksternal) dan penambahan header anti-cache pada `index.html`.
+- Rollback: Membatalkan fitur sudut kamera ganda dan mengembalikan rendering proyeksi isometrik 2:1 murni yang stabil dan konsisten.

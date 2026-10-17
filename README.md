@@ -41,6 +41,7 @@
 - [🚀 Menjalankan Permainan & Build Produksi](#-menjalankan-permainan--build-produksi)
 - [🧪 Pengujian Unit Otomatis (11 Suites)](#-pengujian-unit-otomatis)
 - [📁 Struktur Repositori](#-struktur-repositori)
+- [📈 Roadmap Pengembangan](#-roadmap-pengembangan)
 
 ---
 
@@ -194,7 +195,6 @@ Permainan mendukung kontrol penuh menggunakan **Keyboard / Mouse** maupun **Laya
 | **Pilih Slot Hotbar** | Angka `1`, `2`, `3`, `4` | Ketuk Slot Hotbar |
 | **Buka/Tutup Tas (16 Slot)** | Tombol `I` | Tombol `🎒 Tas [I]` di HUD |
 | **Buka/Tutup Jurnal Misi** | Tombol `J` | Tombol `📜 Jurnal [J]` di HUD |
-| **Ganti Sudut Kamera (Angle)** | Tombol `C` (Isometrik $\leftrightarrow$ Top-Down) | Tombol `📷 [C]` di HUD |
 | **Kontrol Zoom Kamera** | Scroll Mouse atau Tombol `+` / `-` (Reset `0`) | Tombol Zoom `[100%]` di HUD |
 | **Pilih Opsi Dialog** | Angka `1`–`9` / `E` / `Spasi` | Ketuk Pilihan Opsi Dialog |
 | **Tidur & Maju ke Pagi** | Dekati Kasur Pondok lalu tekan `E` | Dekati Kasur lalu ketuk Aksi |
@@ -241,6 +241,37 @@ npm run preview
 
 ---
 
+## 🧪 Pengujian Unit Otomatis
+
+Seluruh logika matematika isometrik, transaksi inventaris, siklus pertumbuhan tanaman, FSM misi narasi, persistensi IndexedDB, sistem kehidupan desa, dan synthesizer audio dilindungi oleh **11 test suites unit otomatis**:
+
+```bash
+# Menjalankan seluruh 11 unit test suite sekaligus:
+npm test
+
+# Menjalankan pengujian integritas bundle mandiri:
+npm run test:build
+```
+
+### Rincian Cakupan Test Suite:
+
+| Test Suite | Peran & Invariant yang Diuji |
+|---|---|
+| `tests/isoMath.test.js` | Akurasi bolak-balik transformasi `tileToScreen` $\leftrightarrow$ `screenToTile` (toleransi $\pm 10^{-6}$). |
+| `tests/inventory.test.js` | Batas kapasitas 16 slot, tumpukan item maks 99, penolakan saat penuh, dan slot swap/merge. |
+| `tests/farming.test.js` | 4 fase pertumbuhan tanaman, pembaruan hari basah/kering, dan proteksi panen aman saat tas penuh. |
+| `tests/quests.test.js` | Transisi status FSM misi narasi (3 beat) dan jaminan token hadiah idempoten anti-duplikasi. |
+| `tests/zoneLayout.test.js` | Konektivitas jalan desa terpadu 36×36, integritas dermaga, dan keterjangkauan seluruh NPC. |
+| `tests/cameraControls.test.js` | Kontrol zoom keyboard/wheel, batas clamping kamera, dan deadzone anti-jitter. |
+| `tests/transactions.test.js` | Validasi atomik transaksi jual-beli kios, kerajinan bengkel, dan mekanisme rollback kegagalan. |
+| `tests/save-roundtrip.test.js` | Integritas siklus serialisasi/deserialisasi snapshot JSON murni bebas siklis DOM/Phaser. |
+| `tests/persistence.test.js` | Isolasi ketat 3 slot IndexedDB, penulisan atomik backup, toleransi data korup, dan fallback session. |
+| `tests/lifeSystems.test.js` | Gathering/mining 3-hit, minigame pancing Kolam Nila, resep dapur/alkimia, dekorasi, Kiko, dan festival. |
+| `tests/audio.test.js` | Web Audio API procedural synthesizer, kebijakan resume gesture, dan kontrol gain live volume. |
+| `tests/build.test.js` | Verifikasi 195+ aset dan modul dalam bundle `dist/` mandiri bebas referensi `node_modules` atau file mentah. |
+
+---
+
 ## 📁 Struktur Repositori
 
 ```
@@ -280,7 +311,21 @@ d:\GAME\SOH\
 └── tests/                      # Suite unit test otomatis
 ```
 
+---
 
+## 📈 Roadmap Pengembangan
+
+Berdasarkan master tasklist perencanaan teknis [task.md](task.md):
+
+- [x] **Phase 0:** Fondasi Sistem, Palet Kurasi Anti-Slop (14 Warna), Pipeline Aset & Booting
+- [x] **Phase 1:** Mesin Isometrik 2:1, NavGrid Pergerakan Dua Sumbu, Dynamic Depth Sorting & Multi-Input
+- [x] **Phase 2:** Sistem Pertanian Terasering (12 Petak), Tas 16-Slot, Jam Dunia 24 Jam & Adaptive HUD
+- [x] **Phase 3:** Entitas NPC, Dialog Bertutur Nusantara Bercabang, Hubungan Sosial, FSM Misi & Peta 36×36
+- [x] **Phase 4:** Sistem Persistensi IndexedDB Multi-Slot (3 Slot), Kustomisasi Karakter, Transaksi & Backup
+- [x] **Phase 5:** Gathering/Mining, Minigame Pancing Kolam Nila, Sahabat Pet Kiko, Kerajinan/Dapur, Dekorasi Interior & Malam Lentera Panen
+- [x] **Phase 6:** Web Audio API Procedural Synthesizer, Responsivitas Mobile Penuh (RESIZE), Audit Anti-Slop, Bundler Mandiri (`dist/`) & QA Release
+
+---
 
 <div align="center">
   <sub>Dibangun dengan dedikasi untuk menghadirkan pengalaman simulasi pedesaan Nusantara yang menenangkan dan hangat.</sub><br/>

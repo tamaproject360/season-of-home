@@ -31,9 +31,6 @@ export class CameraControls {
       } else if (['Digit0', 'Numpad0'].includes(event.code)) {
         event.preventDefault();
         this.setZoom(1);
-      } else if (event.code === 'KeyC') {
-        event.preventDefault();
-        this.scene.toggleCameraAngle?.();
       }
     };
     this.destroy = () => {
