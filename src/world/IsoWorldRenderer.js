@@ -100,13 +100,17 @@ export class IsoWorldRenderer {
     // 4. Render Trees, Foliage, Ore Nodes, Logs & Lanterns
     for (const tree of zoneDef.trees) {
       const screenPos = tileToScreen(tree.tileX, tree.tileY);
-      const sprite = this.scene.add.image(screenPos.x, screenPos.y, tree.textureKey);
+      const isLantern = tree.textureKey === 'lantern_unlit' || tree.textureKey === 'lantern_lit';
 
       let scale = tree.scale || 0.14;
-      let originY = tree.originY || 0.92;
+      let originY = tree.originY ?? 0.92;
       let isSolid = tree.solid !== false;
 
-      if (!tree.scale) {
+      if (isLantern) {
+        scale = tree.scale || 0.035;
+        originY = tree.originY ?? 1;
+        isSolid = false;
+      } else if (!tree.scale) {
         if (tree.textureKey.startsWith('foliage_bush')) {
           scale = 0.12;
           originY = 0.85;
@@ -114,16 +118,17 @@ export class IsoWorldRenderer {
         } else if (tree.textureKey === 'fallen_log') {
           scale = 0.12;
           originY = 0.78;
-        } else if (tree.textureKey === 'harvest_lantern') {
-          scale = 0.11;
-          originY = 0.90;
-          isSolid = false;
         } else if (tree.textureKey === 'mining_ore_node') {
           scale = 0.14;
           originY = 0.85;
         }
       }
 
+      const sprite = this.scene.add.image(
+        screenPos.x,
+        screenPos.y - (tree.offsetY || 0),
+        tree.textureKey
+      );
       sprite.setOrigin(0.5, originY);
       sprite.setScale(scale);
 

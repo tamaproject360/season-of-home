@@ -70,7 +70,8 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('foliage_bush_3', 'asset/nature/foliage_bush_3.png');
     this.load.image('fallen_log', 'asset/nature/fallen_log.png');
     this.load.image('mining_ore_node', 'asset/nature/mining_ore_node.png');
-    this.load.image('harvest_lantern', 'asset/nature/harvest_lantern.png');
+    this.load.image('lantern_unlit', 'asset/nature/lantern_unlit.png');
+    this.load.image('lantern_lit', 'asset/nature/lantern_lit.png');
 
     // 6. Crops & Stages
     for (let s = 1; s <= 4; s++) {

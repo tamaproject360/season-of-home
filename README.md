@@ -14,8 +14,6 @@
 <br/>
 
 <p align="center">
-  <img src="asset/building/joni_cottage.png" width="220" alt="Pondok Joni" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="asset/characters/portraits/suri_bust.png" width="130" alt="Nenek Suri" />
   &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="asset/characters/portraits/joni_bust.png" width="130" alt="Joni" />
@@ -42,7 +40,6 @@
 - [🧪 Pengujian Unit Otomatis](#-pengujian-unit-otomatis)
 - [📁 Struktur Repositori](#-struktur-repositori)
 - [📈 Roadmap Pengembangan](#-roadmap-pengembangan)
-- [📜 Standar Desain & Anti-AI-Slop Manifesto](#-standar-desain--anti-ai-slop-manifesto)
 
 ---
 
@@ -276,15 +273,6 @@ Berdasarkan dokumen perencanaan [task.md](task.md):
 
 ---
 
-## 📜 Standar Desain & Anti-AI-Slop Manifesto
-
-Proyek ini menjunjung tinggi standar kualitas visual sesuai spesifikasi Section 5.5 [blueprint.md](blueprint.md):
-
-1. **Larangan Hex Primer Jenuh:** Tidak diperkenankan menggunakan warna digital murni (`#FF0000`, `#00FF00`, `#0000FF`, `#FFFF00`). Semua warna wajib diturunkan dari 14 palet tanah terkurasi (*Deep Pine*, *Moss*, *Warm Cream*, *Clay Brown*, *Terracotta*, dll.).
-2. **Keterbacaan Siluet Pixel Art:** Setiap entitas memiliki kontur yang jelas tanpa efek glow murahan atau gradient plastik artifisial.
-3. **Penyajian Sentuh Nyaman:** Semua target tombol memenuhi batas minimum aksesibilitas $\ge 44\text{px} \times 44\text{px}$ dengan padding yang ramah jari pada layar sentuh ponsel pintar.
-
----
 
 <div align="center">
   <sub>Dibangun dengan dedikasi untuk menghadirkan pengalaman simulasi pedesaan yang menenangkan dan hangat.</sub><br/>

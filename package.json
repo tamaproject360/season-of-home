@@ -7,7 +7,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "node tests/isoMath.test.js && node tests/inventory.test.js && node tests/farming.test.js && node tests/quests.test.js"
+    "test": "node tests/isoMath.test.js && node tests/inventory.test.js && node tests/farming.test.js && node tests/quests.test.js && node tests/zoneLayout.test.js"
   },
   "keywords": [],
   "author": "",
