@@ -1,4 +1,4 @@
-import { ZONE_FARM } from './zoneDefinitions.js';
+import { ZONE_FARM, ZONE_VILLAGE } from './zoneDefinitions.js';
 import { tileToScreen } from './isoMath.js';
 import { ResourceSystem } from '../systems/ResourceSystem.js';
 import { FishingSystem } from '../systems/FishingSystem.js';
@@ -106,7 +106,7 @@ export class LifeWorld {
     const gathering = [{ tileX: 19.5, tileY: 16.5 }, { tileX: 20.5, tileY: 18.5 }, { tileX: 22.5, tileY: 17.5 }];
     scene.npcs.forEach((npc, i) => {
       scene.navGrid.setSolid(Math.floor(npc.tileX), Math.floor(npc.tileY), false);
-      const position = active ? gathering[i] : ZONE_FARM.npcs[i];
+      const position = active ? gathering[i] : (ZONE_VILLAGE.npcs[i] || npc);
       npc.tileX = position.tileX; npc.tileY = position.tileY;
       const screen = tileToScreen(npc.tileX, npc.tileY);
       npc.x = screen.x; npc.y = screen.y; npc.sprite.setPosition(npc.x, npc.y);

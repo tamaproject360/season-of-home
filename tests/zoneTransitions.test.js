@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { ZONES, getZoneDefinition } from '../src/world/zoneDefinitions.js';
 import { ZoneManager } from '../src/world/ZoneManager.js';
 import { EventBus, EVENTS } from '../src/utils/EventBus.js';
+import { tileToScreen } from '../src/world/isoMath.js';
 
 console.log('--- Multi-Zone Transitions & Registry Unit Tests ---');
 
@@ -60,6 +61,7 @@ const mockScene = {
       setOrigin: () => {},
       setScale: () => {},
       setDepth: () => {},
+      setPosition: () => {},
       play: () => {},
       destroy: () => {}
     })
@@ -110,8 +112,14 @@ const mockScene = {
     x: 0,
     y: 0,
     facing: 'sw',
-    syncScreenPosition: () => {},
-    playIdleAnimation: () => {}
+    updatePosition(x, y, isMoving) {
+      this.tileX = x;
+      this.tileY = y;
+      this.x = x * 32;
+      this.y = y * 16;
+    },
+    syncScreenPosition() {},
+    playIdleAnimation() {}
   }
 };
 
@@ -148,5 +156,25 @@ mockScene.player.tileY = 15.5;
 zm.checkBoundaryPortals(mockScene.player);
 assert.equal(triggeredTarget, 'farm', 'portal transition triggered on boundary arrival');
 console.log('✓ Test 4 Passed: Boundary portal detection works accurately');
+
+// Test 5: Verify real Player & NPC classes have syncScreenPosition
+const { Player } = await import('../src/entities/Player.js');
+const { NPC } = await import('../src/entities/NPC.js');
+const realPlayer = new Player(mockScene, 5, 5, 'sw');
+assert.equal(typeof realPlayer.syncScreenPosition, 'function', 'Player has syncScreenPosition method');
+realPlayer.tileX = 12;
+realPlayer.tileY = 14;
+realPlayer.syncScreenPosition();
+assert.equal(realPlayer.x, tileToScreen(12, 14).x);
+assert.equal(realPlayer.y, tileToScreen(12, 14).y);
+
+const realNPC = new NPC(mockScene, { id: 'test_npc', tileX: 3, tileY: 4 });
+assert.equal(typeof realNPC.syncScreenPosition, 'function', 'NPC has syncScreenPosition method');
+realNPC.tileX = 8;
+realNPC.tileY = 9;
+realNPC.syncScreenPosition();
+assert.equal(realNPC.x, tileToScreen(8, 9).x);
+assert.equal(realNPC.y, tileToScreen(8, 9).y);
+console.log('✓ Test 5 Passed: Real Player & NPC entities implement syncScreenPosition correctly');
 
 console.log('All ZoneTransitions unit tests PASSED successfully!\n');

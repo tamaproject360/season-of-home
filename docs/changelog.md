@@ -20,3 +20,8 @@
   - **Komponen ZoneManager:** Mengorkestrasi transisi antar-zona dengan efek fade-out (200ms) dan fade-in (200ms), SFX cangkul/langkah pintu, pembersihan dan pembangunan visual dunia, pergantian NavGrid, dan reposisi posisi pemain.
   - **Persistensi Multi-Zona:** Menyimpan zona aktif pemain (`activeZone`) dan seluruh petak sawah dinamis ke dalam IndexedDB.
   - **Automated Testing Suite (12 Test Suites):** Memperbarui `tests/zoneLayout.test.js` untuk memvalidasi kelima zona, memperbarui `tests/farming.test.js` untuk uji `tillTile` dan `clearPlot`, serta menambahkan `tests/zoneTransitions.test.js` untuk uji portal dua arah dan ZoneManager. Seluruh 12 test suite lulus 100%.
+- **Fix (Transisi Zona Blank Hitam):**
+  - Mengimplementasikan `syncScreenPosition()` pada kelas `Player` dan `NPC` (diwarisi oleh `Pet`) untuk sinkronisasi posisi layar yang mulus.
+  - Memperbarui `ZoneManager.changeZone` dengan blok `try ... catch ... finally` yang tangguh: menyertakan timeout guard pada promise `fadeOut` dan `fadeIn`, memanggil `resetFX()` jika terjadi kesalahan agar layar tidak pernah terjebak dalam kondisi hitam, serta memastikan `inputRouter.setFrozen(false)` selalu dieksekusi.
+  - Memperbaiki `LifeWorld.syncFestival` agar menggunakan daftar NPC `ZONE_VILLAGE.npcs` yang valid.
+  - Membersihkan sprite tanaman petak sawah saat berpindah keluar dari zona kebun pada `IsoWorldRenderer.clearZone()`.

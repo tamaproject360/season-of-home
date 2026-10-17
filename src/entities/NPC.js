@@ -84,6 +84,15 @@ export class NPC {
     this.playIdleAnimation();
   }
 
+  syncScreenPosition() {
+    const screenPos = tileToScreen(this.tileX, this.tileY);
+    this.x = screenPos.x;
+    this.y = screenPos.y;
+    if (this.sprite && typeof this.sprite.setPosition === 'function') {
+      this.sprite.setPosition(this.x, this.y);
+    }
+  }
+
   getFootY() {
     return this.y;
   }

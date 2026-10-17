@@ -16,6 +16,7 @@ export class IsoWorldRenderer {
   }
 
   buildZone(zoneDef, farmingSystem = null) {
+    this.farmingSystem = farmingSystem;
     // Reuse the earthy pixels of the source path, but clip a complete diamond.
     // The source stripe itself cannot connect along both isometric axes.
     for (const [key, sourceKey, sampleY] of [
@@ -237,6 +238,14 @@ export class IsoWorldRenderer {
       }
     }
     this.groundTiles = [];
+
+    if (this.farmingSystem) {
+      for (const plot of this.farmingSystem.getPlots()) {
+        if (typeof plot.destroyVisuals === 'function') {
+          plot.destroyVisuals();
+        }
+      }
+    }
 
     for (const prop of this.props) {
       if (prop) {
