@@ -1,5 +1,6 @@
 import { copyData, validateSave } from './SaveSerializer.js';
 
+/** Normalize legacy snapshots idempotently while protecting unsupported future versions. */
 export function migrateSave(input) {
   if (input?.schemaVersion > 1) {
     const error = new Error('Save dibuat oleh versi game yang lebih baru. Data tidak diubah.');

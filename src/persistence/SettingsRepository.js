@@ -26,6 +26,7 @@ export class SettingsRepository {
   }
 }
 
+/** Apply persisted accessibility and volume preferences to the DOM and engine. */
 export function applySettings(settings, game = null) {
   if (typeof document !== 'undefined') {
     const root = document.documentElement;

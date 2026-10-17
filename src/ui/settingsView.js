@@ -1,7 +1,9 @@
+/** Escape user-provided text inserted into DOM templates. */
 export const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 }[c]));
 
+/** Render the shared settings form used by the title and pause menus. */
 export function settingsMarkup(settings) {
   return `<form class="phase4-form" data-settings-form>
     <label>Ukuran teks<select name="textScale">${[1, 1.25, 1.5].map(n =>
@@ -16,6 +18,7 @@ export function settingsMarkup(settings) {
   </form>`;
 }
 
+/** Convert settings form fields to the typed preference payload. */
 export function readSettings(form) {
   const data = new FormData(form);
   return { textScale: Number(data.get('textScale')), touchControlSize: Number(data.get('touchControlSize')),

@@ -23,7 +23,7 @@ export class DialoguePanel {
       <div class="dialogue-card" role="dialog" aria-modal="true" aria-label="Percakapan">
         <div class="dialogue-portrait-pane">
           <div class="dialogue-portrait-frame">
-            <img class="dialogue-portrait-img" id="dialogue-portrait" src="" alt="Potret Karakter" />
+            <img class="dialogue-portrait-img" id="dialogue-portrait" src="asset/characters/portraits/joni_bust.png" alt="Potret Karakter" />
           </div>
           <div class="dialogue-affinity-badge" id="dialogue-affinity">Sahabat Lembah</div>
         </div>

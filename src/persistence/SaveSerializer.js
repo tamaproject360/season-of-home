@@ -11,10 +11,12 @@ export const OUTFITS = {
   outfit_clay: { name: 'Tanah liat', tint: 0xF2C7AB },
   outfit_straw: { name: 'Jerami hangat', tint: 0xEEE1AC }
 };
+/** Deep-copy serializable state without retaining live model references. */
 export const copyData = value => JSON.parse(JSON.stringify(value));
 const integer = (n, min, max = Number.MAX_SAFE_INTEGER) => Number.isSafeInteger(n) && n >= min && n <= max;
 const requireValue = (condition, message) => { if (!condition) throw new Error(`Save tidak valid: ${message}`); };
 
+/** Create a complete, validated starter snapshot for one save slot. */
 export function createNewSave({ slotId = 1, name = 'Joni', appearanceId = 'outfit_sage' } = {}) {
   const inventory = new InventorySystem(16);
   for (const [id, count] of [['tool_hoe', 1], ['tool_watering_can', 1], ['seed_sunroot', 3],
@@ -43,6 +45,7 @@ export function createNewSave({ slotId = 1, name = 'Joni', appearanceId = 'outfi
   return save;
 }
 
+/** Reject malformed snapshots before they can mutate the active game. */
 export function validateSave(s) {
   requireValue(s && typeof s === 'object' && s.schemaVersion === 1, 'versi skema');
   requireValue(integer(s.slotId, 1, 3) && integer(s.revision, 0), 'slot/revisi');
@@ -128,6 +131,7 @@ export function validateSave(s) {
   return true;
 }
 
+/** Capture a coherent plain-data snapshot from the active scene systems. */
 export function captureSave(scene) {
   const save = copyData(scene.saveData);
   save.updatedAt = new Date().toISOString();
@@ -144,6 +148,7 @@ export function captureSave(scene) {
   return copyData(save);
 }
 
+/** Restore validated state and recover a player position blocked by the current layout. */
 export function restoreSave(scene, input) {
   validateSave(input);
   const save = copyData(input);

@@ -2,6 +2,7 @@ import { InventorySystem } from './InventorySystem.js';
 import { getItemDefinition } from '../data/items.js';
 import { EventBus, EVENTS } from '../utils/EventBus.js';
 
+/** Stage all inputs/outputs before committing inventory, wallet and domain events together. */
 export function inventoryTransaction(inventory, wallet, { inputs = [], outputs = [], coinDelta = 0, commit }) {
   const nextCoins = wallet.coins + coinDelta;
   if (!Number.isSafeInteger(coinDelta) || !Number.isSafeInteger(nextCoins) || nextCoins < 0) {
