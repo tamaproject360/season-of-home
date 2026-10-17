@@ -418,7 +418,7 @@ stateDiagram-v2
 Panduan perintah operasional CLI pengembangan, eksekusi tes, dan pembuatan paket produksi:
 
 ```bash
-# 1. Menjalankan Seluruh Automated Unit Test Suites (11 Test Suites Lengkap)
+# 1. Menjalankan Seluruh Automated Unit Test Suites (12 Test Suites Lengkap)
 npm test
 
 # 2. Menjalankan Uji Bundle Produksi Mandiri
@@ -429,7 +429,8 @@ node tests/isoMath.test.js          # Invariant proyeksi koordinat 2:1 (±1e-6)
 node tests/inventory.test.js        # Uji batas tumpukan 99 & slot swap/merge
 node tests/farming.test.js          # Uji siklus tanam 4 stage & proteksi panen aman
 node tests/quests.test.js           # Uji FSM quest narasi & token reward idempoten
-node tests/zoneLayout.test.js       # Uji konektivitas jalan desa & keterjangkauan NPC
+node tests/zoneLayout.test.js       # Uji penerimaan layout & navigasi 5 zona mandiri
+node tests/zoneTransitions.test.js  # Uji registry zona, portal dua arah & ZoneManager
 node tests/cameraControls.test.js   # Uji kontrol zoom & deadzone clamping
 node tests/transactions.test.js     # Uji mutasi atomik ekonomi & crafting
 node tests/save-roundtrip.test.js   # Uji integritas siklus snapshot JSON murni
@@ -545,3 +546,50 @@ export function executeInventoryTransaction(inventory, currentCoins, itemsToRemo
 4. **Input Focus & Movement Freeze:** Karakter dan waktu permainan secara otomatis dibekukan saat pemain sedang membuka dialog atau modal menu, memastikan pemain tidak kehilangan waktu atau tertabrak rintangan saat membaca narasi.
 5. **Keterbacaan Kontras Tinggi:** Warna teks gelap (`#2D3835`) di atas kertas perkamen terang (`#F2E8D5`) memberikan rasio kontras tinggi (>7:1) yang sangat nyaman dibaca tanpa melelahkan mata.
 6. **Autoplay-Safe Audio Bridge:** Web Audio API tidak memicu suara secara otomatis saat load halaman untuk mencegah browser policy rejection; konteks audio diinisialisasi secara anggun pada ketukan/interaksi pertama pengguna.
+
+---
+
+## Multi-Zone Topology & Free-Form Dynamic Farming (Phase 7)
+
+Arsitektur multi-zona mandiri dan sistem pertanian dinamis tanpa batas petak statis:
+
+### 1. Partisi 5 Zona Mandiri
+1. **Kebun Privat Joni (`farm`, 32×32):**
+   - Area khusus pertanian bebas Joni, terpisah dari hiruk pikuk pasar dan warga.
+   - Dilengkapi eksterior pondok panggung, kolam air tawar pengisi kaleng siram, 12 petak sawah awal (dapat diperluas tanpa batas), dan area bermain musang Kiko.
+   - Portal: Pintu masuk pondok (`cottage`), jalan timur ke Pasar Desa (`village`), jalan selatan ke Danau Lembah (`lake`).
+
+2. **Interior Pondok Joni (`cottage`, 14×14):**
+   - Ruang dalam pondok kayu nyaman nusantara.
+   - Dilengkapi ranjang tidur (`joni_bed`) untuk istirahat dan memajukan hari (autosave pagi), karpet anyaman nusantara (`woven_rug`), pot tanaman hias (`plant_pot`), dan pintu keluar ke kebun.
+
+3. **Pasar & Alun-Alun Desa (`village`, 34×34):**
+   - Pusat kehidupan komunitas desa Lembah Rimbun.
+   - Menghadirkan Kios Bibit & Hasil Tani Nara, Bengkel Perkakas & Pandai Besi Paman Bima, Paviliun Diskusi Nenek Suri, dan Papan Festival Panen.
+   - Portal: Jalan barat ke Kebun Joni (`farm`), gerbang hutan utara ke Gunung & Gua Tambang (`mine`), dan jalan selatan ke Danau Lembah (`lake`).
+
+4. **Danau Lembah (`lake`, 32×32):**
+   - Cekungan danau air jernih dengan dermaga kayu panggung panjang (`fishing_pier`, 3×10 ubin walkable).
+   - Titik memancing ikan nila dan lele, bebatuan tepian air, dan vegetasi bambu air.
+   - Portal: Jalan utara barat ke Kebun Joni (`farm`), jalan utara timur ke Pasar Desa (`village`).
+
+5. **Kaki Gunung & Gua Tambang (`mine`, 32×32):**
+   - Kaki tebing pegunungan berbatu dengan jalan setapak mendaki.
+   - Memuat 8 node mineral tambang (bijih besi, batu kali) dengan sistem reset harian serta jamur hutan liar.
+   - Portal: Mulut gua tambang dan jalan keluar selatan kembali ke Pasar Desa (`village`).
+
+### 2. Komponen ZoneManager (`src/world/ZoneManager.js`)
+- **Transisi Sinematik 200ms Fade-Out / 200ms Fade-In:**
+  - Pembekuan input (`inputRouter.setFrozen(true)`) dan pemutaran SFX transisi (`hoe` / pintu).
+  - Fade-out kamera ke hitam dalam 200ms.
+  - Pembersihan entitas visual lama melalui `IsoWorldRenderer.clearZone()`.
+  - Pembangunan ulang NavGrid sesuai dimensi zona target (`zoneDef.width` × `zoneDef.height`).
+  - Unmount dan spawn NPC khusus zona target (Nara, Bima, Suri hanya di-spawn di Desa).
+  - Pembangunan ubin, bangunan, vegetasi, dan sumber daya zona target via `IsoWorldRenderer.buildZone()`.
+  - Reposisi pemain ke koordinat spawn tujuan yang aman dan sinkronisasi kamera follow.
+  - Fade-in kamera dalam 200ms, pembukaan kunci input, dan notifikasi UI toast nama zona baru.
+
+### 3. Sistem Pertanian Dinamis Bebas (`FarmingSystem.tillTile` & `clearPlot`)
+- **Cangkul Bebas di Kebun Joni:** Pemain dapat menggunakan cangkul (`tool_hoe`) di ubin rumput/tanah mana saja di dalam `tillableBounds` (`8..29, 7..29`) yang tidak terhalang jalan setapak atau kolam air.
+- **Pembersihan Lahan Kosong (`clearPlot`):** Petak tilled/watered yang belum ditanami benih dapat dibersihkan kembali menjadi rumput alami menggunakan alat cangkul/arit, memberikan kendali penuh penataan kebun.
+- **Persistensi State Dinamis:** Seluruh petak dinamis yang dicangkul pemain disimpan ke dalam array `farm.plots` pada IndexedDB dan diregenerasi secara otomatis saat pemain masuk kembali ke kebun atau memuat ulang save game.

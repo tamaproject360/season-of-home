@@ -1,4 +1,4 @@
-import { ZONE_FARM } from '../world/zoneDefinitions.js';
+import { ZONE_FARM, getZoneDefinition } from '../world/zoneDefinitions.js';
 import { NavGrid } from '../world/navGrid.js';
 import { DepthSorter } from '../world/DepthSorter.js';
 import { IsoWorldRenderer } from '../world/IsoWorldRenderer.js';
@@ -23,6 +23,7 @@ import { DEFAULT_SETTINGS, applySettings } from '../persistence/SettingsReposito
 import { EventBus, EVENTS } from '../utils/EventBus.js';
 import { LifeWorld } from '../world/LifeWorld.js';
 import { AudioSystem } from '../systems/AudioSystem.js';
+import { ZoneManager } from '../world/ZoneManager.js';
 
 /**
  * GameScene
@@ -40,12 +41,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
-    console.log('[GameScene] Initializing Phase 4 persistent village...');
+    console.log('[GameScene] Initializing Multi-Zone World & Dynamic Farming...');
     applySettings(this.settings, this.game);
     this.wallet = { coins: this.initialSave.player.coins };
 
+    const startZoneId = this.initialSave?.world?.activeZone || 'farm';
+    const initialZoneDef = getZoneDefinition(startZoneId);
+
     // 1. Navigation grid and Depth sorter
-    this.navGrid = new NavGrid(ZONE_FARM.width, ZONE_FARM.height);
+    this.navGrid = new NavGrid(initialZoneDef.width, initialZoneDef.height);
     this.depthSorter = new DepthSorter();
 
     // 2. Core simulation systems
@@ -59,16 +63,16 @@ export class GameScene extends Phaser.Scene {
 
     // 3. Isometric World Renderer with dynamic farm plots
     this.worldRenderer = new IsoWorldRenderer(this, this.navGrid, this.depthSorter);
-    this.worldRenderer.buildZone(ZONE_FARM, this.farmingSystem);
+    this.worldRenderer.buildZone(initialZoneDef, startZoneId === 'farm' ? this.farmingSystem : null);
 
-    // 4. Spawn Player (Joni) & NPCs (Suri, Bima, Nara)
-    const spawn = ZONE_FARM.spawnPoint;
+    // 4. Spawn Player (Joni) & NPCs
+    const spawn = initialZoneDef.spawnPoint;
     this.player = new Player(this, spawn.tileX, spawn.tileY, spawn.facing);
     this.depthSorter.register(this.player);
 
     this.npcs = [];
-    if (ZONE_FARM.npcs) {
-      for (const npcDef of ZONE_FARM.npcs) {
+    if (initialZoneDef.npcs && initialZoneDef.npcs.length > 0) {
+      for (const npcDef of initialZoneDef.npcs) {
         const npc = new NPC(this, npcDef);
         this.npcs.push(npc);
         this.depthSorter.register(npc);
@@ -76,10 +80,15 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    // 5. Input router and systems
+    // 5. Input router, ZoneManager, and interaction systems
     this.inputRouter = new InputRouter(this);
     this.movementSystem = new MovementSystem(this.navGrid);
-    this.interactionSystem = new InteractionSystem(ZONE_FARM.interactives, this.farmingSystem, this.npcs);
+    this.interactionSystem = new InteractionSystem(initialZoneDef.interactives, this.farmingSystem, this.npcs);
+    this.interactionSystem.setActiveZone(initialZoneDef);
+
+    this.zoneManager = new ZoneManager(this);
+    this.zoneManager.currentZoneId = startZoneId;
+    this.zoneManager.currentZoneDef = initialZoneDef;
 
     // 6. Camera follow setup with exponential lerp and deadzone
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08);
@@ -189,6 +198,11 @@ export class GameScene extends Phaser.Scene {
     // 3. Update movement
     this.movementSystem.update(this.player, inputVec, deltaMs);
 
+    // 3b. Check boundary portal transitions
+    if (this.zoneManager) {
+      this.zoneManager.checkBoundaryPortals(this.player);
+    }
+
     // 4. Update interaction proximity with currently equipped item
     const activeItemId = this.activeItem ? this.activeItem.id : null;
     this.interactionSystem.update(this.player, activeItemId);
@@ -205,7 +219,9 @@ export class GameScene extends Phaser.Scene {
 
         const uiScene = this.scene.get('UIScene');
 
-        if (target.type === 'bed') {
+        if (target.item?.targetZone) {
+          this.zoneManager.changeZone(target.item.targetZone, target.item.targetSpawn);
+        } else if (target.type === 'bed') {
           this.sleepAndAdvanceDay();
         } else if (target.type === 'npc') {
           if (this.dialogueSystem) {

@@ -21,8 +21,10 @@ export class NavGrid {
   }
 
   setSolid(tx, ty, isSolid = true) {
-    if (tx >= 0 && tx < this.width && ty >= 0 && ty < this.height) {
-      this.grid[ty][tx] = isSolid ? 1 : 0;
+    const ix = Math.floor(tx);
+    const iy = Math.floor(ty);
+    if (ix >= 0 && ix < this.width && iy >= 0 && iy < this.height) {
+      this.grid[iy][ix] = isSolid ? 1 : 0;
     }
   }
 

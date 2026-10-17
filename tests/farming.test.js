@@ -116,4 +116,28 @@ assert.strictEqual(plot1.growthStage, 0);
 assert.strictEqual(plot1.soilState, 'tilled'); // Plot remains tilled ready for next seed
 console.log('✓ Test 8 Passed: Harvest extracts crop, rewards inventory, and leaves soil ready');
 
+// Test 9: Dynamic tilling on unplotted land
+const dynamicRes = farming.tillTile(15, 20);
+assert.strictEqual(dynamicRes.success, true);
+assert.strictEqual(dynamicRes.action, 'till');
+const dynamicPlot = farming.getPlot('dynamic_plot_15_20');
+assert.ok(dynamicPlot, 'dynamic plot registered in farming system');
+assert.strictEqual(dynamicPlot.tileX, 15);
+assert.strictEqual(dynamicPlot.tileY, 20);
+assert.strictEqual(dynamicPlot.soilState, 'tilled');
+
+// Reject duplicate till on same coordinates
+const dupTill = farming.tillTile(15, 20);
+assert.strictEqual(dupTill.success, false);
+assert.strictEqual(dupTill.reason, 'already_tilled');
+console.log('✓ Test 9 Passed: Dynamic tilling creates new plot and prevents duplicates');
+
+// Test 10: Clear unplanted plot back to natural terrain
+const clearRes = farming.clearPlot(dynamicPlot);
+assert.strictEqual(clearRes.success, true);
+assert.strictEqual(clearRes.action, 'clear');
+assert.strictEqual(farming.getPlot('dynamic_plot_15_20'), null, 'cleared plot unregistered from farming system');
+assert.strictEqual(farming.getPlotAt(15, 20), null, 'getPlotAt returns null for cleared coordinates');
+console.log('✓ Test 10 Passed: Plot clearing unregisters and restores open ground');
+
 console.log('All FarmingSystem unit tests PASSED successfully!\n');

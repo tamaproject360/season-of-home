@@ -16,6 +16,11 @@ export class InteractionSystem {
     this.lastTriggerTime = 0;
     this.debounceMs = 300;
     this.extraTargets = () => [];
+    this.activeZone = null;
+  }
+
+  setActiveZone(zoneDef) {
+    this.activeZone = zoneDef;
   }
 
   setInteractives(interactives) {
@@ -52,6 +57,34 @@ export class InteractionSystem {
               priority: action.priority || 50
             };
           }
+        }
+      }
+    }
+
+    // 1b. Free-Form Hoe Tilling on open tillable tiles in farm zone
+    if (this.farmingSystem && activeItemId === 'tool_hoe' && this.activeZone?.isTillable) {
+      const facing = player.facing || 'se';
+      const offsetMap = {
+        se: { dx: 1, dy: 0 },
+        sw: { dx: 0, dy: 1 },
+        ne: { dx: 0, dy: -1 },
+        nw: { dx: -1, dy: 0 }
+      };
+      const offset = offsetMap[facing] || { dx: 0, dy: 1 };
+      const targetTx = Math.round(player.tileX + offset.dx * 0.9);
+      const targetTy = Math.round(player.tileY + offset.dy * 0.9);
+
+      if (this.activeZone.isTillable(targetTx, targetTy) && !this.farmingSystem.getPlotAt(targetTx, targetTy)) {
+        const d = distance(player.tileX, player.tileY, targetTx, targetTy);
+        if (d <= closestDist) {
+          closestDist = d;
+          closestTarget = {
+            type: 'tillable_tile',
+            tileX: targetTx,
+            tileY: targetTy,
+            prompt: 'Cangkul Tanah Baru [E]',
+            priority: 85
+          };
         }
       }
     }
@@ -115,6 +148,8 @@ export class InteractionSystem {
 
       if (this.currentTarget.type === 'farm_plot' && this.farmingSystem) {
         result = this.farmingSystem.executeAction(this.currentTarget.plot, activeItemId);
+      } else if (this.currentTarget.type === 'tillable_tile' && this.farmingSystem) {
+        result = this.farmingSystem.tillTile(this.currentTarget.tileX, this.currentTarget.tileY);
       } else if (this.currentTarget.type === 'npc') {
         if (this.currentTarget.npc && this.currentTarget.npc.facePlayer) {
           this.currentTarget.npc.facePlayer(player.tileX, player.tileY);

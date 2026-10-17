@@ -1,6 +1,7 @@
 import { getCropBySeedId, getCropDefinition } from '../data/crops.js';
 import { getItemDefinition } from '../data/items.js';
 import { EventBus, EVENTS } from '../utils/EventBus.js';
+import { FarmPlot } from '../entities/FarmPlot.js';
 
 /**
  * FarmingSystem
@@ -39,6 +40,56 @@ export class FarmingSystem {
       }
     }
     return null;
+  }
+
+  /**
+   * Dynamically till a grass/soil tile in Joni's farmstead.
+   * Creates a new FarmPlot entity on demand.
+   * @param {number} tileX
+   * @param {number} tileY
+   */
+  tillTile(tileX, tileY) {
+    const existing = this.getPlotAt(tileX, tileY);
+    if (existing) {
+      if (existing.soilState === 'grass') {
+        return this.executeAction(existing, 'tool_hoe');
+      }
+      return { success: false, reason: 'already_tilled' };
+    }
+
+    const id = `dynamic_plot_${tileX}_${tileY}`;
+    const newPlot = new FarmPlot(this.scene, id, tileX, tileY, 'tilled');
+    this.registerPlot(newPlot);
+
+    if (this.scene && this.scene.worldRenderer && Array.isArray(this.scene.worldRenderer.groundTiles)) {
+      this.scene.worldRenderer.groundTiles.push(newPlot.plotSprite);
+    }
+
+    EventBus.emit(EVENTS.PLOT_TILLED, { plot: newPlot });
+    return {
+      success: true,
+      action: 'till',
+      plot: newPlot,
+      message: 'Tanah baru berhasil dicangkul gembur.'
+    };
+  }
+
+  /**
+   * Clear an unplanted plot back to natural grass using scythe or hoe.
+   * @param {FarmPlot} plot
+   */
+  clearPlot(plot) {
+    if (!plot) return { success: false, reason: 'no_plot' };
+    if (plot.cropId === null && (plot.soilState === 'tilled' || plot.soilState === 'watered')) {
+      plot.destroy();
+      this.plots.delete(plot.id);
+      return {
+        success: true,
+        action: 'clear',
+        message: 'Lahan dibersihkan kembali menjadi rumput alami.'
+      };
+    }
+    return { success: false, reason: 'has_crop' };
   }
 
   /**
@@ -211,10 +262,15 @@ export class FarmingSystem {
   deserialize(data) {
     if (!data || !Array.isArray(data.plots)) return;
     for (const plotData of data.plots) {
-      const plot = this.plots.get(plotData.id);
-      if (plot) {
-        plot.deserialize(plotData);
+      let plot = this.plots.get(plotData.id);
+      if (!plot) {
+        plot = new FarmPlot(this.scene, plotData.id, plotData.tileX, plotData.tileY, plotData.soilState || 'tilled');
+        this.registerPlot(plot);
+        if (this.scene && this.scene.worldRenderer && Array.isArray(this.scene.worldRenderer.groundTiles)) {
+          this.scene.worldRenderer.groundTiles.push(plot.plotSprite);
+        }
       }
+      plot.deserialize(plotData);
     }
   }
 }

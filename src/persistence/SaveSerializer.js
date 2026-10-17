@@ -56,13 +56,13 @@ export function validateSave(s) {
   requireValue(['clear', 'cloudy', 'rain'].includes(s.world.weather), 'cuaca');
   const player = s.player;
   requireValue(player && typeof player.name === 'string' && player.name.trim().length > 0 && player.name.length <= 24, 'nama');
-  requireValue(Object.hasOwn(OUTFITS, player.appearanceId) && player.zoneId === 'farm', 'penampilan/zona');
+  requireValue(Object.hasOwn(OUTFITS, player.appearanceId) && ['farm', 'cottage', 'village', 'lake', 'mine'].includes(player.zoneId), 'penampilan/zona');
   requireValue(integer(player.coins, 0) && [1, 2].includes(player.toolLevel?.wateringCan), 'koin/peralatan');
   requireValue(['sw', 'se', 'nw', 'ne'].includes(player.facing), 'arah hadap');
   requireValue(Number.isFinite(player.zoom) && player.zoom >= 0.5 && player.zoom <= 1.75, 'zoom');
   const p = player.position;
   requireValue(p && Number.isFinite(p.tileX) && Number.isFinite(p.tileY) &&
-    p.tileX >= 0 && p.tileX < ZONE_FARM.width && p.tileY >= 0 && p.tileY < ZONE_FARM.height, 'posisi');
+    p.tileX >= 0 && p.tileX < 64 && p.tileY >= 0 && p.tileY < 64, 'posisi');
   const inv = s.inventory;
   requireValue(inv?.capacity === 16 && Array.isArray(inv.slots) && inv.slots.length === 16 && integer(inv.nextInstanceId, 1), 'tas');
   const instances = new Set();
@@ -74,10 +74,10 @@ export function validateSave(s) {
       !instances.has(item.instanceId) && Number(item.instanceId.slice(5)) < inv.nextInstanceId, 'instance item');
     instances.add(item.instanceId);
   }
-  requireValue(Array.isArray(s.farm?.plots) && s.farm.plots.length === 12, 'dua belas petak kebun');
+  requireValue(Array.isArray(s.farm?.plots), 'petak kebun');
   const plots = new Set();
   for (const plot of s.farm.plots) {
-    requireValue(ZONE_FARM.plots.some(p => p.id === plot.id) && !plots.has(plot.id), 'ID petak');
+    requireValue(typeof plot.id === 'string' && !plots.has(plot.id), 'ID petak');
     plots.add(plot.id);
     requireValue(['grass', 'tilled', 'watered'].includes(plot.soilState), 'kondisi tanah');
     requireValue(plot.cropId === null || Object.hasOwn(CROPS, plot.cropId), 'ID tanaman');
@@ -136,8 +136,11 @@ export function captureSave(scene) {
   const save = copyData(scene.saveData);
   save.updatedAt = new Date().toISOString();
   save.meta.playtimeSeconds = scene.playtimeSeconds ?? save.meta.playtimeSeconds;
-  save.world = { ...save.world, ...scene.worldClock.getState() };
+  const currentZoneId = scene.zoneManager ? scene.zoneManager.getCurrentZoneId() : (save.player?.zoneId || 'farm');
+  save.meta.lastZoneId = currentZoneId;
+  save.world = { ...save.world, ...scene.worldClock.getState(), activeZone: currentZoneId };
   save.player = { ...save.player, ...copyData(scene.profile), coins: scene.wallet.coins,
+    zoneId: currentZoneId,
     position: { tileX: scene.player.tileX, tileY: scene.player.tileY }, facing: scene.player.facing,
     zoom: scene.cameraControls?.targetZoom ?? 1 };
   save.inventory = scene.inventory.serialize();

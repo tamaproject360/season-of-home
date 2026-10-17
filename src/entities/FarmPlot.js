@@ -177,8 +177,39 @@ export class FarmPlot {
     this.updateVisuals();
   }
 
+  destroyVisuals() {
+    if (this.plotSprite && typeof this.plotSprite.destroy === 'function') {
+      this.plotSprite.destroy();
+      this.plotSprite = null;
+    }
+    if (this.cropSprite && typeof this.cropSprite.destroy === 'function') {
+      this.cropSprite.destroy();
+      this.cropSprite = null;
+    }
+  }
+
+  rebuildVisuals(scene = this.scene) {
+    this.scene = scene;
+    this.destroyVisuals();
+    const screenPos = tileToScreen(this.tileX, this.tileY);
+    this.x = screenPos.x;
+    this.y = screenPos.y;
+
+    this.plotSprite = scene.add.image(this.x, this.y, this.getPlotTextureKey());
+    this.plotSprite.setOrigin(0.5, 0.5);
+    this.plotSprite.setDisplaySize(64, 41);
+    this.plotSprite.setDepth(30);
+
+    this.cropSprite = scene.add.image(this.x, this.y - 6, 'crop_sunroot_stage1');
+    this.cropSprite.setOrigin(0.5, 0.85);
+    this.cropSprite.setScale(0.18);
+    this.cropSprite.setDepth(35);
+    this.cropSprite.setVisible(false);
+
+    this.updateVisuals();
+  }
+
   destroy() {
-    if (this.plotSprite) this.plotSprite.destroy();
-    if (this.cropSprite) this.cropSprite.destroy();
+    this.destroyVisuals();
   }
 }

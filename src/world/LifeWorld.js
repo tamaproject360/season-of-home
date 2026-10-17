@@ -40,6 +40,7 @@ export class LifeWorld {
       scene.add.rectangle(0, -20, 56, 24, 0x87674E).setStrokeStyle(2, 0x59483B),
       scene.add.text(0, -20, 'FESTIVAL', { fontFamily: 'sans-serif', fontSize: '9px', color: '#EEE1C4' }).setOrigin(0.5)
     ]);
+    this.board = board;
     scene.depthSorter.register({ sprite: board, active: true, getFootY: () => p.y });
     this.banners = scene.add.graphics().setDepth(1600);
     const start = tileToScreen(17, 14), end = tileToScreen(24, 14);
@@ -47,6 +48,15 @@ export class LifeWorld {
     for (let i = 1; i < 9; i++) {
       const t = i / 9, x = start.x + (end.x - start.x) * t, y = start.y + (end.y - start.y) * t - 56;
       this.banners.fillStyle(i % 2 ? 0xD9AE6B : 0xBC7654).fillTriangle(x - 4, y, x + 4, y, x, y + 9);
+    }
+  }
+
+  updateZone(zoneId) {
+    const isVillage = zoneId === 'village';
+    if (this.board) this.board.setVisible(isVillage);
+    if (this.banners) {
+      const celebrated = this.scene.saveData?.world?.festivalState?.harvest_lantern_night === 'celebrated';
+      this.banners.setVisible(isVillage && celebrated);
     }
   }
 

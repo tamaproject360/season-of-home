@@ -95,14 +95,21 @@ export class IsoWorldRenderer {
     }
     this.groundTiles.push(roads);
 
-    // 2. Render 12 Farmland Plots (from zoneDef.plots)
+    // 2. Render Farmland Plots (from farmingSystem or zoneDef.plots)
     if (farmingSystem) {
-      for (const plot of zoneDef.plots) {
-        const farmPlot = new FarmPlot(this.scene, plot.id, plot.tileX, plot.tileY, plot.initialSoil || 'tilled');
-        farmingSystem.registerPlot(farmPlot);
-        this.groundTiles.push(farmPlot.plotSprite);
+      if (farmingSystem.getPlots().length === 0 && zoneDef.plots) {
+        for (const plot of zoneDef.plots) {
+          const farmPlot = new FarmPlot(this.scene, plot.id, plot.tileX, plot.tileY, plot.initialSoil || 'tilled');
+          farmingSystem.registerPlot(farmPlot);
+          this.groundTiles.push(farmPlot.plotSprite);
+        }
+      } else {
+        for (const farmPlot of farmingSystem.getPlots()) {
+          farmPlot.rebuildVisuals(this.scene);
+          this.groundTiles.push(farmPlot.plotSprite);
+        }
       }
-    } else {
+    } else if (zoneDef.plots && zoneDef.plots.length > 0) {
       for (const plot of zoneDef.plots) {
         const screenPos = tileToScreen(plot.tileX, plot.tileY);
         const plotImg = this.scene.add.image(screenPos.x, screenPos.y, 'plot_tilled');
@@ -114,7 +121,7 @@ export class IsoWorldRenderer {
     }
 
     // 3. Render Static Buildings & Landmark Structures
-    for (const bldg of zoneDef.buildings) {
+    for (const bldg of zoneDef.buildings || []) {
       const centerTileX = bldg.tileX + bldg.footprintW / 2;
       const centerTileY = bldg.tileY + bldg.footprintH / 2;
       const screenPos = tileToScreen(
@@ -168,7 +175,8 @@ export class IsoWorldRenderer {
     }
 
     // 4. Render Trees, Foliage, Ore Nodes, Logs & Lanterns
-    for (const tree of [...zoneDef.trees, ...(zoneDef.resources || [])]) {
+    const natureProps = [...(zoneDef.trees || []), ...(zoneDef.resources || [])];
+    for (const tree of natureProps) {
       const screenPos = tileToScreen(tree.tileX, tree.tileY);
       const isLantern = tree.textureKey === 'lantern_unlit' || tree.textureKey === 'lantern_lit';
 
@@ -217,5 +225,27 @@ export class IsoWorldRenderer {
       this.depthSorter.register(propObj);
       this.props.push(propObj);
     }
+  }
+
+  /**
+   * Tear down all ground tiles, roads, and props when changing zones.
+   */
+  clearZone() {
+    for (const tile of this.groundTiles) {
+      if (tile && typeof tile.destroy === 'function') {
+        tile.destroy();
+      }
+    }
+    this.groundTiles = [];
+
+    for (const prop of this.props) {
+      if (prop) {
+        if (this.depthSorter) this.depthSorter.unregister(prop);
+        if (prop.sprite && typeof prop.sprite.destroy === 'function') {
+          prop.sprite.destroy();
+        }
+      }
+    }
+    this.props = [];
   }
 }

@@ -191,18 +191,18 @@ Sesuai metodologi arsitektur game modern, tasklist disusun secara modular dari l
 | 103 | Uji coba playthrough end-to-end vertikal slice 15–25 menit tanpa blocker (Alur: Buka Slot -> Gerak -> Tanam/Siram/Panen -> Bicara NPC -> Selesaikan Quest -> Crafting -> Simpan & Reload). | Selesai | P0 | Phase 6 |
 | 104 | Pembuatan bundle build mandiri (*self-contained / modular bundle*) yang kompatibel dengan pratinjau Gemini Web Canvas serta hosting statis standar. | Selesai | P0 | Phase 6 |
 | **Y** | **PHASE 7: MULTI-ZONE WORLD PARTITIONING & DYNAMIC FREE-FORM FARMING** | | | |
-| 105 | Definisi Topologi 5 Zona Mandiri: Implementasi konfigurasi zona terpisah di src/world/zoneDefinitions.js (ZONE_FARM, ZONE_COTTAGE, ZONE_VILLAGE, ZONE_LAKE, ZONE_MINE) lengkap dengan dimensi, jalur jalan, bangunan, vegetasi, batuan, dan waypoint portal. | Belum Mulai | P0 | Phase 7 |
-| 106 | Komponen ZoneManager: Implementasi src/world/ZoneManager.js untuk mengorkestrasi transisi antar zona, pembersihan dan pemuatan entitas visual IsoWorldRenderer, serta reposisi posisi pemain. | Belum Mulai | P0 | Phase 7 |
-| 107 | Efek Transisi Kamera & Audio Pintu: Implementasi efek visual kamera fade-out (200ms) dan fade-in (200ms) serta SFX langkah/pintu kayu saat berpindah zona secara mulus. | Belum Mulai | P0 | Phase 7 |
-| 108 | Sistem Pertanian Bebas (Free-Form Dynamic Tilling): Integrasi cangkul (tool_hoe) pada FarmingSystem.js dan InteractionSystem.js agar pemain bebas mencangkul petak rumput/tanah mana saja di kebun Joni ([E] Cangkul Tanah) tanpa batasan petak statis. | Belum Mulai | P0 | Phase 7 |
-| 109 | Pembersihan Lahan (Scythe / Arit): Implementasi pembersihan petak tanah kosong kembali menjadi rumput alami menggunakan alat cangkul/arit untuk merapikan pekarangan kebun. | Belum Mulai | P1 | Phase 7 |
-| 110 | Peta & Render Kebun Privat Joni (zone_farm): Pembuatan peta lapang khusus pertanian (32x32) berisi eksterior pondok, kolam pengisi kaleng siram, peti panen, Kiko bermain, dan portal jalan timur & selatan. | Belum Mulai | P0 | Phase 7 |
-| 111 | Peta & Render Interior Rumah Joni (zone_cottage_interior): Pembuatan peta interior pondok (14x14) berisi tempat tidur untuk tidur/skip hari, karpet anyaman nusantara, rak dinding, dan pintu keluar. | Belum Mulai | P0 | Phase 7 |
-| 112 | Peta & Render Pasar & Alun-Alun Desa (zone_village): Pembuatan peta desa mandiri (34x34) berisi Kios Nara, Bengkel Bima, Paviliun Suri, papan festival, dan portal ke Kebun, Danau, serta Gunung. | Belum Mulai | P0 | Phase 7 |
-| 113 | Peta & Render Danau Lembah (zone_lake): Pembuatan peta danau luas (32x32) berair biru jernih dengan dermaga kayu panjang untuk memancing ikan nila/lele. | Belum Mulai | P0 | Phase 7 |
-| 114 | Peta & Render Kaki Gunung & Gua Tambang (zone_mountain_mine): Pembuatan peta tebing gunung (32x32) berisi 10-12 formasi bebatuan ore nodes, ranting kayu liar, dan gerbang mulut gua tambang. | Belum Mulai | P0 | Phase 7 |
-| 115 | Persistensi Multi-Zona & Petak Dinamis: Pembaruan SaveSerializer.js dan SaveManager.js untuk serialisasi activeZoneId serta daftar seluruh petak dinamis yang dicangkul pemain di IndexedDB. | Belum Mulai | P0 | Phase 7 |
-| 116 | Unit Testing & Verifikasi Invarian: Pembaruan test suite tests/farming.test.js, penyesuaian tests/zoneLayout.test.js, serta pembuatan test suite tests/zoneTransitions.test.js untuk memvalidasi cangkul dinamis dan transisi antar 5 zona. | Belum Mulai | P0 | Phase 7 |
+| 105 | Definisi Topologi 5 Zona Mandiri: Implementasi konfigurasi zona terpisah di src/world/zoneDefinitions.js (ZONE_FARM, ZONE_COTTAGE, ZONE_VILLAGE, ZONE_LAKE, ZONE_MINE) lengkap dengan dimensi, jalur jalan, bangunan, vegetasi, batuan, dan waypoint portal. | Selesai | P0 | Phase 7 |
+| 106 | Komponen ZoneManager: Implementasi src/world/ZoneManager.js untuk mengorkestrasi transisi antar zona, pembersihan dan pemuatan entitas visual IsoWorldRenderer, serta reposisi posisi pemain. | Selesai | P0 | Phase 7 |
+| 107 | Efek Transisi Kamera & Audio Pintu: Implementasi efek visual kamera fade-out (200ms) dan fade-in (200ms) serta SFX langkah/pintu kayu saat berpindah zona secara mulus. | Selesai | P0 | Phase 7 |
+| 108 | Sistem Pertanian Bebas (Free-Form Dynamic Tilling): Integrasi cangkul (tool_hoe) pada FarmingSystem.js dan InteractionSystem.js agar pemain bebas mencangkul petak rumput/tanah mana saja di kebun Joni ([E] Cangkul Tanah) tanpa batasan petak statis. | Selesai | P0 | Phase 7 |
+| 109 | Pembersihan Lahan (Scythe / Arit)| Selesai | P1 | Phase 7 |
+| 110 | Peta & Render Kebun Privat Joni (zone_farm): Pembuatan peta lapang khusus pertanian (32x32) berisi eksterior pondok, kolam pengisi kaleng siram, peti panen, Kiko bermain, dan portal jalan timur & selatan. | Selesai | P0 | Phase 7 |
+| 111 | Peta & Render Interior Rumah Joni (zone_cottage_interior): Pembuatan peta interior pondok (14x14) berisi tempat tidur untuk tidur/skip hari, karpet anyaman nusantara, rak dinding, dan pintu keluar. | Selesai | P0 | Phase 7 |
+| 112 | Peta & Render Pasar & Alun-Alun Desa (zone_village): Pembuatan peta desa mandiri (34x34) berisi Kios Nara, Bengkel Bima, Paviliun Suri, papan festival, dan portal ke Kebun, Danau, serta Gunung. | Selesai | P0 | Phase 7 |
+| 113 | Peta & Render Danau Lembah (zone_lake): Pembuatan peta danau luas (32x32) berair biru jernih dengan dermaga kayu panjang untuk memancing ikan nila/lele. | Selesai | P0 | Phase 7 |
+| 114 | Peta & Render Kaki Gunung & Gua Tambang (zone_mountain_mine): Pembuatan peta tebing gunung (32x32) berisi 10-12 formasi bebatuan ore nodes, ranting kayu liar, dan gerbang mulut gua tambang. | Selesai | P0 | Phase 7 |
+| 115 | Persistensi Multi-Zona & Petak Dinamis: Pembaruan SaveSerializer.js dan SaveManager.js untuk serialisasi activeZoneId serta daftar seluruh petak dinamis yang dicangkul pemain di IndexedDB. | Selesai | P0 | Phase 7 |
+| 116 | Unit Testing & Verifikasi Invarian: Pembaruan test suite tests/farming.test.js, penyesuaian tests/zoneLayout.test.js, serta pembuatan test suite tests/zoneTransitions.test.js untuk memvalidasi cangkul dinamis dan transisi antar 5 zona. | Selesai | P0 | Phase 7 |
 
 ---
 
