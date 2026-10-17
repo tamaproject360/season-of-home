@@ -13,6 +13,22 @@ export const ITEM_CATEGORIES = {
 };
 
 export const ITEMS = {
+  herb: {
+    id: 'herb', name: 'Herba Lembah', category: 'resource', maxStack: 99,
+    buyPrice: 8, sellPrice: 5, sellable: true, icon: 'asset/nature/forage_vine.png', description: 'Daun segar untuk masakan dan tonik.'
+  },
+  mushroom: {
+    id: 'mushroom', name: 'Jamur Hutan', category: 'resource', maxStack: 99,
+    buyPrice: 10, sellPrice: 6, sellable: true, icon: 'asset/nature/forage_mushroom.png', description: 'Jamur pangan dari hutan desa.'
+  },
+  fiber: {
+    id: 'fiber', name: 'Serat Tanaman', category: 'resource', maxStack: 99,
+    buyPrice: 6, sellPrice: 3, sellable: true, icon: 'asset/nature/forage_vine.png', description: 'Serat alami dari tumbuhan liar.'
+  },
+  silverfin: {
+    id: 'silverfin', name: 'Silverfin', category: 'resource', maxStack: 99,
+    buyPrice: 60, sellPrice: 45, sellable: true, icon: 'asset/items/item_riverfish.png', description: 'Ikan perak yang sesekali ditemukan di Kolam Nila.'
+  },
   // Tools
   tool_hoe: {
     id: 'tool_hoe',

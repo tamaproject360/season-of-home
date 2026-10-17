@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { tileToScreen, screenToTile } from '../src/world/isoMath.js';
+import { tileToScreen, screenToTile, worldScreenToTile } from '../src/world/isoMath.js';
 
 console.log('--- Running isoMath Invariant Tests ---');
 
@@ -52,5 +52,13 @@ for (const coord of quadCoords) {
   assert(Math.abs(back.ty - coord.ty) < 1e-6);
 }
 console.log('✓ Test 4 Passed: 4 Quadrants & Negative coordinates handling');
+
+const camera = { x: 10, y: 20, width: 960, height: 540, zoom: 1.6, scrollX: 100, scrollY: 70 };
+const projected = tileToScreen(12.25, 8.5);
+const pointerX = camera.x + camera.width / 2 + (projected.x - camera.scrollX - camera.width / 2) * camera.zoom;
+const pointerY = camera.y + camera.height / 2 + (projected.y - camera.scrollY - camera.height / 2) * camera.zoom;
+const picked = worldScreenToTile(pointerX, pointerY, camera);
+assert.ok(Math.abs(picked.tx - 12.25) < 1e-6 && Math.abs(picked.ty - 8.5) < 1e-6,
+  'pointer inversion must include zoom around the viewport center and camera offset');
 
 console.log('All isoMath tests PASSED successfully!\n');

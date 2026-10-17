@@ -61,6 +61,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('plot_watered', 'asset/terrain/plot_watered.png');
     this.load.image('plot_untilled', 'asset/terrain/plot_untilled.png');
     this.load.image('fishing_pier', 'asset/terrain/fishing_pier.png');
+    this.load.image('pond_water_tile', 'asset/terrain/pond_water_tile.png');
 
     // 5. Nature & Vegetation
     this.load.image('tree_tropical_large', 'asset/nature/tree_tropical_large.png');
@@ -70,6 +71,12 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('foliage_bush_3', 'asset/nature/foliage_bush_3.png');
     this.load.image('fallen_log', 'asset/nature/fallen_log.png');
     this.load.image('mining_ore_node', 'asset/nature/mining_ore_node.png');
+    this.load.image('ore_node_intact', 'asset/nature/ore_node_intact.png');
+    this.load.image('ore_node_cracked', 'asset/nature/ore_node_cracked.png');
+    this.load.image('ore_node_depleted', 'asset/nature/ore_node_depleted.png');
+    this.load.image('forage_twig', 'asset/nature/forage_twig.png');
+    this.load.image('forage_vine', 'asset/nature/forage_vine.png');
+    this.load.image('forage_mushroom', 'asset/nature/forage_mushroom.png');
     this.load.image('lantern_unlit', 'asset/nature/lantern_unlit.png');
     this.load.image('lantern_lit', 'asset/nature/lantern_lit.png');
 

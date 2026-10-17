@@ -139,6 +139,7 @@ export class WorldClock {
 
   getState() {
     return {
+      year: 1 + Math.floor((this.day - 1) / (DAYS_PER_SEASON * SEASONS.length)),
       day: this.day,
       season: this.season,
       timeMinutes: this.timeMinutes,
@@ -154,10 +155,6 @@ export class WorldClock {
     this.timeMinutes = state.timeMinutes !== undefined ? state.timeMinutes : 360;
     this.lastEmittedHour = Math.floor(this.timeMinutes / 60);
     this.weather = state.weather || this.computeWeather(this.day);
-    this.emit('day', {
-      day: this.day,
-      season: this.season,
-      weather: this.weather
-    });
+    this.emit('tick', this.getTimeString());
   }
 }

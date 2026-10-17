@@ -72,6 +72,15 @@ export class DialogueSystem {
       }
     }
 
+    if (this.festivalActive) {
+      targetQuestId = null;
+      targetNode = { text: {
+        suri: 'Lihat lentera-lentera itu! Kebun dan kebaikanmu membuat desa ini hangat kembali.',
+        bima: 'Kerja kita terbayar malam ini. Terima kasih sudah membantu bengkel dan seluruh desa!',
+        nara: 'Malam Lentera Panen akhirnya tiba! Mari menikmati hasil kerja kita bersama-sama.'
+      }[npcId], options: [{ text: 'Selamat merayakan malam panen!', next: null }] };
+    }
+
     // 4. Fallback to daily village greetings
     if (!targetNode) {
       targetQuestId = null;
@@ -127,6 +136,8 @@ export class DialogueSystem {
       const claimRes = this.questSystem.claimReward(this.currentQuestId);
       if (claimRes.success && this.showToast) {
         this.showToast(`Misi Selesai! Imbalan +${claimRes.coins} Koin Daun & Afeksi!`);
+      } else if (this.showToast) {
+        this.showToast(claimRes.message || 'Hadiah belum dapat diambil. Periksa tujuan misi dan ruang tas.');
       }
     }
 

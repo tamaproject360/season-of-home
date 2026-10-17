@@ -5,6 +5,7 @@ import { IsoWorldRenderer } from '../world/IsoWorldRenderer.js';
 import { Player } from '../entities/Player.js';
 import { NPC } from '../entities/NPC.js';
 import { InputRouter } from '../input/InputRouter.js';
+import { CameraControls } from '../input/CameraControls.js';
 import { MovementSystem } from '../systems/MovementSystem.js';
 import { InteractionSystem } from '../systems/InteractionSystem.js';
 import { InventorySystem } from '../systems/InventorySystem.js';
@@ -13,6 +14,15 @@ import { FarmingSystem } from '../systems/FarmingSystem.js';
 import { RelationshipSystem } from '../systems/RelationshipSystem.js';
 import { QuestSystem } from '../systems/QuestSystem.js';
 import { DialogueSystem } from '../systems/DialogueSystem.js';
+import { EconomySystem } from '../systems/EconomySystem.js';
+import { CraftingSystem } from '../systems/CraftingSystem.js';
+import { StorageRepo } from '../persistence/SaveRepository.js';
+import { SaveManager } from '../persistence/SaveManager.js';
+import { createNewSave, captureSave, restoreSave } from '../persistence/SaveSerializer.js';
+import { DEFAULT_SETTINGS, applySettings } from '../persistence/SettingsRepository.js';
+import { EventBus, EVENTS } from '../utils/EventBus.js';
+import { LifeWorld } from '../world/LifeWorld.js';
+import { AudioSystem } from '../systems/AudioSystem.js';
 
 /**
  * GameScene
@@ -24,8 +34,15 @@ export class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
   }
 
+  init(data = {}) {
+    this.initialSave = data.save || createNewSave();
+    this.settings = { ...DEFAULT_SETTINGS, ...data.settings };
+  }
+
   create() {
-    console.log('[GameScene] Initializing Phase 2 Agricultural & Phase 3 Social Core...');
+    console.log('[GameScene] Initializing Phase 4 persistent village...');
+    applySettings(this.settings, this.game);
+    this.wallet = { coins: this.initialSave.player.coins };
 
     // 1. Navigation grid and Depth sorter
     this.navGrid = new NavGrid(ZONE_FARM.width, ZONE_FARM.height);
@@ -36,7 +53,7 @@ export class GameScene extends Phaser.Scene {
     this.worldClock = new WorldClock(1, 'spring');
     this.farmingSystem = new FarmingSystem(this, this.inventory, this.worldClock);
     this.relationshipSystem = new RelationshipSystem();
-    this.questSystem = new QuestSystem(this.inventory, this.relationshipSystem);
+    this.questSystem = new QuestSystem(this.inventory, this.relationshipSystem, this.wallet);
     this.dialogueSystem = new DialogueSystem(this.questSystem, this.relationshipSystem);
     this.activeItem = null;
 
@@ -66,13 +83,63 @@ export class GameScene extends Phaser.Scene {
 
     // 6. Camera follow setup with exponential lerp and deadzone
     this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08);
-    this.cameras.main.setZoom(1.0);
+    this.cameraControls = new CameraControls(this);
 
-    // 7. Seed initial player starter inventory
-    this.seedStarterInventory();
-
-    // 8. Seed initial farm plots for instant player gratification
-    this.seedStarterPlots();
+    // Restore only after collision and NPC footprints are built. New-game data
+    // already contains its starter plots and supplies; loading never reseeds them.
+    restoreSave(this, this.initialSave);
+    if (this.inventory.hasItem('tool_reinforced_can')) this.profile.toolLevel.wateringCan = 2;
+    this.economy = new EconomySystem(this.inventory, this.wallet);
+    this.crafting = new CraftingSystem(this.inventory, this.wallet, this.profile.toolLevel);
+    this.saveManager = new SaveManager({
+      repository: StorageRepo,
+      capture: () => captureSave(this),
+      onStatus: status => this.scene.get('UIScene').hudController?.setSaveStatus(status),
+      onSaved: saved => { this.saveData.revision = saved.revision; this.saveData.updatedAt = saved.updatedAt; }
+    });
+    this.lifeWorld = new LifeWorld(this);
+    this.audio = new AudioSystem(() => this.settings);
+    this.interactionSystem.setExtraTargets(() => this.lifeWorld.getTargets());
+    this.saveSubscriptions = [
+      this.inventory.onChange(() => {
+        if (this.inventory.hasItem('tool_reinforced_can')) this.profile.toolLevel.wateringCan = 2;
+        this.saveManager.request();
+      }),
+      this.questSystem.onChange(() => this.saveManager.request()),
+      this.worldClock.on('day', () => { this.relationshipSystem.onNewDay(); this.saveManager.request(); }),
+      EventBus.on(EVENTS.SAVE_REQUESTED, () => this.saveManager.request()),
+      EventBus.on(EVENTS.NPC_TALKED, () => this.saveManager.request()),
+      EventBus.on(EVENTS.QUEST_REWARDED, ({ flags = [] }) => {
+        flags.forEach(flag => { this.saveData.flags[flag] = true; });
+        this.saveManager.save().catch(() => {});
+      }),
+      ...[EVENTS.PLOT_WATERED, EVENTS.PLOT_TILLED, EVENTS.CROP_PLANTED, EVENTS.CROP_HARVESTED]
+        .map(event => EventBus.on(event, () => this.saveManager.request()))
+    ];
+    this.autosaveTimer = this.time.addEvent({ delay: 15000, loop: true, callback: () => {
+      if (!this.inputRouter.isFrozen) this.saveManager.save().catch(() => {});
+    } });
+    this.onVisibilityChange = () => {
+      if (document.hidden) {
+        this.wasFrozenBeforeHide = this.inputRouter.isFrozen;
+        this.inputRouter.setFrozen(true); this.worldClock.freeze();
+      } else if (this.wasFrozenBeforeHide !== undefined) {
+        this.inputRouter.setFrozen(this.wasFrozenBeforeHide);
+        if (!this.wasFrozenBeforeHide) this.worldClock.unfreeze();
+        this.wasFrozenBeforeHide = undefined;
+      }
+    };
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
+    this.events.once('shutdown', () => {
+      document.removeEventListener('visibilitychange', this.onVisibilityChange);
+      this.scene.stop('UIScene');
+      this.saveManager.dispose();
+      this.saveSubscriptions.forEach(unsubscribe => unsubscribe());
+      this.questSystem.destroy();
+      this.lifeWorld.destroy();
+      this.audio.dispose();
+      this.inputRouter.destroy();
+    });
 
     // 9. Launch UI Scene (HUD, Hotbar, Inventory Modal, Dialogue Panel)
     this.scene.launch('UIScene', {
@@ -93,41 +160,12 @@ export class GameScene extends Phaser.Scene {
       this.sleepAndAdvanceDay();
     });
 
-    console.log('[GameScene] Phase 2 Farming & Inventory loop active.');
-  }
-
-  seedStarterInventory() {
-    // 4 hotbar starter items
-    this.inventory.addItem('tool_hoe', 1);
-    this.inventory.addItem('tool_watering_can', 1);
-    this.inventory.addItem('seed_sunroot', 3);
-    this.inventory.addItem('seed_mossberry', 2);
-  }
-
-  seedStarterPlots() {
-    // Plot 1: Planted Sunroot (Stage 2: sprout)
-    const p1 = this.farmingSystem.getPlot('plot_01');
-    if (p1) {
-      p1.plant('sunroot', 1);
-      p1.water(1);
-      p1.growthStage = 2;
-      p1.updateVisuals();
-    }
-
-    // Plot 2: Mature Mossberry (Stage 4: ready to harvest)
-    const p2 = this.farmingSystem.getPlot('plot_02');
-    if (p2) {
-      p2.plant('mossberry', 1);
-      p2.growthStage = 4;
-      p2.updateVisuals();
-    }
+    console.log('[GameScene] Phase 4 systems active.');
   }
 
   sleepAndAdvanceDay() {
     this.worldClock.advanceToMorning();
-    if (this.relationshipSystem) {
-      this.relationshipSystem.onNewDay();
-    }
+    this.saveManager.save().catch(() => {});
     const uiScene = this.scene.get('UIScene');
     if (uiScene && uiScene.showToast) {
       uiScene.showToast(`Selamat pagi! Hari ke-${this.worldClock.day} dimulai (${this.worldClock.weather}).`);
@@ -139,7 +177,11 @@ export class GameScene extends Phaser.Scene {
 
     // 1. Advance World Clock
     const deltaSec = Math.min(deltaMs / 1000, 0.1);
+    this.cameraControls.update(deltaMs);
+    if (!this.inputRouter.isFrozen) this.playtimeSeconds += deltaSec;
     this.worldClock.update(deltaSec);
+    this.lifeWorld.update(deltaSec);
+    this.audio.update(deltaSec, { moving: Math.hypot(this.player.vx, this.player.vy) > 0.05, paused: this.inputRouter.isFrozen });
 
     // 2. Get input
     const inputVec = this.inputRouter.getMovementVector();
@@ -154,6 +196,8 @@ export class GameScene extends Phaser.Scene {
     // 5. Trigger contextual action if pressed
     if (this.inputRouter.isActionRequested()) {
       this.interactionSystem.triggerAction(this.player, activeItemId, (target, result) => {
+        const sound = { till: 'hoe', plant: 'hoe', water: 'water', harvest: 'harvest', talk: 'talk' }[result?.action];
+        if (sound) this.audio.play(sound);
         // Play tool swing / work animation
         this.player.playActionAnimation(() => {
           this.player.playIdleAnimation();
@@ -167,6 +211,12 @@ export class GameScene extends Phaser.Scene {
           if (this.dialogueSystem) {
             this.dialogueSystem.startDialogue(target.npc);
           }
+        } else if (target.type === 'shop') {
+          uiScene.phase4Panels.openShop();
+        } else if (target.type === 'crafting') {
+          uiScene.phase4Panels.openCraft();
+        } else if (this.lifeWorld.interact(target)) {
+          // LifeWorld dispatches resource, home, pet, fishing and festival actions.
         } else if (result && result.message) {
           if (uiScene && uiScene.showToast) {
             uiScene.showToast(result.message);

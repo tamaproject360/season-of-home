@@ -1,0 +1,76 @@
+import assert from 'node:assert/strict';
+import { InventorySystem } from '../src/systems/InventorySystem.js';
+import { ResourceSystem } from '../src/systems/ResourceSystem.js';
+import { FishingSystem } from '../src/systems/FishingSystem.js';
+import { DecorationSystem } from '../src/systems/DecorationSystem.js';
+import { FestivalSystem } from '../src/systems/FestivalSystem.js';
+import { PetSystem } from '../src/systems/PetSystem.js';
+import { CraftingSystem } from '../src/systems/CraftingSystem.js';
+import { WorldClock } from '../src/world/WorldClock.js';
+
+const bag = new InventorySystem();
+const wallet = { coins: 80 };
+const clock = new WorldClock();
+const nodes = [{ id: 'ore1', type: 'mining', itemId: 'ore', count: 2, hits: 3, tileX: 3, tileY: 3 }];
+const resourceState = {};
+const resources = new ResourceSystem(nodes, bag, wallet, clock, resourceState);
+assert.equal(resources.interact('ore1').success, true);
+assert.equal(resources.getNodeState('ore1').hits, 1);
+resources.interact('ore1');
+resources.interact('ore1');
+assert.equal(bag.getItemCount('ore'), 2);
+assert.equal(resources.interact('ore1').success, false);
+clock.advanceToMorning();
+resources.onNewDay();
+assert.equal(resources.getNodeState('ore1').depleted, false);
+
+const fish = new FishingSystem(bag, wallet, clock, {});
+assert.equal(fish.start().success, false, 'fishing requires a rod');
+bag.addItem('tool_fishing_rod');
+assert.equal(fish.start().success, true);
+for (let i = 0; i < 1200 && fish.status === 'active'; i++) fish.update(0.05, fish.position < fish.target);
+assert.equal(fish.status, 'caught');
+const caught = bag.getItemCount('riverfish') + bag.getItemCount('silverfin');
+fish.update(0.1, true);
+assert.equal(bag.getItemCount('riverfish') + bag.getItemCount('silverfin'), caught, 'fish rewards are not repeatable');
+
+bag.addItem('herb', 4); bag.addItem('mushroom', 1);
+const craft = new CraftingSystem(bag, wallet, { wateringCan: 1 });
+assert.equal(craft.craft('herb_soup').success, false, 'recipes require the proper workstation');
+assert.equal(craft.craft('herb_soup', 'cooking').success, true);
+assert.equal(bag.getItemCount('herb_soup'), 1);
+assert.equal(craft.craft('dew_tonic', 'alchemy').success, true);
+
+const housing = { placedObjects: [] };
+const decor = new DecorationSystem(housing);
+assert.equal(decor.place('woven_rug', 0, 0).success, false);
+assert.equal(decor.place('woven_rug', 2, 2).success, true);
+const object = housing.placedObjects[0];
+assert.equal(decor.place('plant_pot', 2, 2).success, false, 'furniture cannot overlap');
+assert.equal(decor.move(object.objectId, 3, 3).success, true);
+assert.equal(decor.move(object.objectId, 4, 4).success, false, 'the rug must fit entirely in the room');
+assert.equal(new DecorationSystem(structuredClone(housing)).state.placedObjects[0].gridX, 3);
+assert.equal(decor.pickUp(object.objectId).success, true);
+assert.equal(housing.storage.woven_rug, 1);
+
+const petState = { affection: 0, mode: 'following', lastPettedDay: -1 };
+const pet = new PetSystem(petState, clock);
+assert.equal(pet.pet().success, true);
+assert.equal(pet.pet().success, false);
+assert.equal(petState.affection, 3);
+pet.toggleFollow();
+assert.equal(petState.mode, 'resting');
+
+const flags = {};
+const festivalState = {};
+const festival = new FestivalSystem({ flags, festivalState, clock, inventory: bag, wallet });
+assert.equal(festival.activate().success, false);
+flags.festival_unlocked = true;
+assert.equal(festival.activate().success, false, 'festival opens in the evening');
+clock.timeMinutes = 1080;
+const before = wallet.coins;
+assert.equal(festival.activate().success, true);
+assert.equal(wallet.coins, before + 100);
+assert.equal(festival.activate().success, false);
+assert.equal(wallet.coins, before + 100);
+console.log('Phase 5: gathering/mining/reset, fishing, cooking/alchemy, furnishing, daily pet care and festival rewards PASS');

@@ -8,19 +8,26 @@ export class TouchControls {
   constructor() {
     this.vector = { x: 0, y: 0 };
     this.actionPressed = false;
+    this.listeners = [];
     this.setupListeners();
   }
 
   setupListeners() {
+    const listen = (element, event, callback) => {
+      element.addEventListener(event, callback);
+      this.listeners.push(() => element.removeEventListener(event, callback));
+    };
     const dpad = document.getElementById('virtual-dpad');
     const overlay = document.getElementById('touch-overlay');
     if (!dpad || !overlay) return;
 
     // Detect touch device or small screen and display overlay
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice || window.innerWidth < 960) {
-      overlay.style.display = 'block';
-    }
+    const updateVisibility = () => {
+      const isTouchDevice = navigator.maxTouchPoints > 0 && window.matchMedia('(pointer: coarse)').matches;
+      overlay.style.display = isTouchDevice || window.innerWidth < 760 ? 'block' : 'none';
+    };
+    updateVisibility();
+    listen(window, 'resize', updateVisibility);
 
     const setDir = (dx, dy) => {
       this.vector = normalize(dx, dy);
@@ -33,12 +40,13 @@ export class TouchControls {
     const bindButton = (id, dx, dy) => {
       const btn = document.getElementById(id);
       if (!btn) return;
-      btn.addEventListener('pointerdown', (e) => {
+      listen(btn, 'pointerdown', (e) => {
         e.preventDefault();
         setDir(dx, dy);
       });
-      btn.addEventListener('pointerup', clearDir);
-      btn.addEventListener('pointercancel', clearDir);
+      listen(btn, 'pointerup', clearDir);
+      listen(btn, 'pointercancel', clearDir);
+      listen(btn, 'pointerleave', clearDir);
     };
 
     bindButton('dpad-up', 0, -1);
@@ -52,11 +60,11 @@ export class TouchControls {
 
     const actionBtn = document.getElementById('btn-action');
     if (actionBtn) {
-      actionBtn.addEventListener('pointerdown', (e) => {
+      listen(actionBtn, 'pointerdown', (e) => {
         e.preventDefault();
         this.actionPressed = true;
       });
-      actionBtn.addEventListener('pointerup', () => {
+      listen(actionBtn, 'pointerup', () => {
         this.actionPressed = false;
       });
     }
@@ -72,5 +80,13 @@ export class TouchControls {
       return true;
     }
     return false;
+  }
+
+  destroy() {
+    this.listeners.forEach(remove => remove());
+    this.listeners = [];
+    this.vector = { x: 0, y: 0 };
+    const overlay = document.getElementById('touch-overlay');
+    if (overlay) overlay.style.display = 'none';
   }
 }

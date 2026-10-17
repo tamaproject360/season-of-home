@@ -36,4 +36,6 @@ export class InputRouter {
     if (this.isFrozen) return false;
     return this.desktop.isInteractJustPressed() || this.touch.consumeActionPress();
   }
+
+  destroy() { this.touch.destroy(); }
 }

@@ -6,24 +6,26 @@
 
 [![Phaser 3.88.2](https://img.shields.io/badge/Phaser-3.88.2-8b5cf6?style=for-the-badge&logo=phaser&logoColor=white)](https://phaser.io/)
 [![JavaScript ES2022+](https://img.shields.io/badge/JavaScript-ES2022+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![Zero-Build Architecture](https://img.shields.io/badge/Build-Zero--Bundler-10b981?style=for-the-badge&logo=esbuild&logoColor=white)](docs/specs.md)
-[![Tests Passing](https://img.shields.io/badge/Tests-100%25%20Passing-success?style=for-the-badge&logo=vitest&logoColor=white)](#-automated-testing)
-[![Platform](https://img.shields.io/badge/Platform-Desktop%20%7C%20Mobile-f59e0b?style=for-the-badge&logo=html5&logoColor=white)](index.html)
+[![Zero-Build Architecture](https://img.shields.io/badge/Build-ESM%20Native%20%7C%20Zero--Bundler-10b981?style=for-the-badge&logo=esbuild&logoColor=white)](docs/specs.md)
+[![Tests Passing](https://img.shields.io/badge/Tests-11%2F11%20Suites%20Passing-success?style=for-the-badge&logo=vitest&logoColor=white)](#-pengujian-unit-otomatis)
+[![Platform](https://img.shields.io/badge/Platform-Desktop%20%7C%20Mobile%20Responsive-f59e0b?style=for-the-badge&logo=html5&logoColor=white)](index.html)
 [![License: ISC](https://img.shields.io/badge/License-ISC-3b82f6?style=for-the-badge)](package.json)
 
 <br/>
 
 <p align="center">
-  <img src="asset/characters/portraits/suri_bust.png" width="130" alt="Nenek Suri" />
+  <img src="asset/characters/portraits/suri_bust.png" width="120" alt="Nenek Suri" />
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="asset/characters/portraits/joni_bust.png" width="130" alt="Joni" />
+  <img src="asset/characters/portraits/joni_bust.png" width="120" alt="Joni" />
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="asset/characters/portraits/nara_bust.png" width="130" alt="Nara" />
+  <img src="asset/characters/portraits/nara_bust.png" width="120" alt="Nara" />
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="asset/characters/portraits/bima_bust.png" width="130" alt="Paman Bima" />
+  <img src="asset/characters/portraits/bima_bust.png" width="120" alt="Paman Bima" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="asset/characters/portraits/kiko_bust.png" width="120" alt="Kiko" />
 </p>
 
-*Menghidupkan kembali kebun warisan kakek di lembah terasering berbukit, bersahabat dengan warga desa, dan menyambut tradisi Malam Lentera Panen.*
+*Menghidupkan kembali kebun warisan kakek di lembah terasering berbukit, bersahabat dengan warga desa, bertualang bersama Kiko, dan menyambut tradisi Malam Lentera Panen.*
 
 </div>
 
@@ -34,10 +36,10 @@
 - [✨ Gambaran Proyek](#-gambaran-proyek)
 - [🎮 Fitur Utama & Progress Terkini](#-fitur-utama--progress-terkini)
 - [🛠️ Tech Stack & Arsitektur](#️-tech-stack--arsitektur)
-- [🗺️ Tata Letak Dunia (32×32 Lembah Rimbun)](#️-tata-letak-dunia-3232-lembah-rimbun)
+- [🗺️ Tata Letak Dunia (36×36 Lembah Rimbun)](#️-tata-letak-dunia-3636-lembah-rimbun)
 - [🕹️ Kontrol & Panduan Bermain](#️-kontrol--panduan-bermain)
-- [🚀 Menjalankan Permainan Lokal](#-menjalankan-permainan-lokal)
-- [🧪 Pengujian Unit Otomatis](#-pengujian-unit-otomatis)
+- [🚀 Menjalankan Permainan & Build Produksi](#-menjalankan-permainan--build-produksi)
+- [🧪 Pengujian Unit Otomatis (11 Suites)](#-pengujian-unit-otomatis)
 - [📁 Struktur Repositori](#-struktur-repositori)
 - [📈 Roadmap Pengembangan](#-roadmap-pengembangan)
 
@@ -45,106 +47,139 @@
 
 ## ✨ Gambaran Proyek
 
-**Seasons of Home (Lembah Rimbun)** adalah game simulasi kehidupan pedesaan isometrik 2D berbasis peramban web modern. Berlatar belakang di sebuah lembah pegunungan tropis-hangat yang tenang, protagonis (Joni) kembali untuk memulihkan pondok kayu tua dan petak kebun terasering peninggalan sang kakek.
+**Seasons of Home (Lembah Rimbun)** adalah permainan simulasi kehidupan pedesaan isometrik 2D berbasis peramban web modern. Berlatar belakang di sebuah lembah pegunungan tropis-hangat yang tenang, protagonis (**Joni**) kembali untuk memulihkan pondok kayu tua dan petak kebun terasering peninggalan sang kakek.
 
-Game ini mengusung pendekatan **cozy living**:
-- ❌ **Tanpa Kekerasan & Tanpa Tekanan:** Tidak ada mekanik pertarungan, monster perusak, atau *time-pressure* yang agresif.
-- 🌿 **Nuansa Nusantara Otentik:** Memadukan arsitektur panggung kayu, dinding papan, genteng tanah liat, petak sawah berundak, tanaman lokal (*Sunroot*, *Mossberry*, *Goldenleaf*), dan perayaan syukur "Malam Lentera Panen".
-- ⚡ **Zero-Build Architecture:** Berjalan langsung melalui Native ES Modules (ESM) peramban murni tanpa proses *compilation/bundling* runtime yang rumit.
+Permainan ini mengusung pendekatan **cozy restorative living**:
+- ❌ **Tanpa Kekerasan & Tanpa Tekanan Waktu:** Tidak ada monster musuh, mekanik pertarungan, ancaman kematian (*permadeath*), atau penalti waktu yang menekan. Pemain bebas menikmati ritme hari sesuai tempo masing-masing.
+- 🌿 **Nuansa Nusantara Otentik:** Memadukan arsitektur panggung kayu, dinding papan, genteng tanah liat bertingkat, sawah terasering berundak, komoditas lokal (*Sunroot*, *Mossberry*, *Goldenleaf*), serta tradisi perayaan syukur "Malam Lentera Panen".
+- 🎨 **Manifesto Anti-AI-Slop:** Seluruh visual mengacu ketat pada 14 palet warna kurasi alami (*earthy & warm tokens*). Bebas dari warna primer jenuh menyengat, bebas dari filter blur/glow murahan, serta mengutamakan keterbacaan siluet pixel-art yang hangat.
+- ⚡ **Zero-Build & Standalone Bundle:** Berjalan langsung melalui Native ES Modules (ESM) peramban murni tanpa build runtime, serta dilengkapi pipeline bundler mandiri (`npm run build`) yang menghasilkan bundle mandiri (`dist/`) siap hosting.
 
 ---
 
 ## 🎮 Fitur Utama & Progress Terkini
 
-### 1. 🌾 Sistem Pertanian & Siklus Agrikultur (Phase 2 — Selesai)
-- **12 Petak Kebun Terasering (3×4):** Setiap petak memiliki state mesin terisolasi (`soilState`: rumput, gembur/dicangkul, basah/disiram).
+### 1. 🌾 Sistem Pertanian Terasering (12 Petak Kebun)
+- **12 Petak Kebun Terisolasi (3×4):** Setiap petak memiliki state mesin mandiri (`grass` $\to$ `tilled` $\to$ `watered`).
 - **Siklus 4 Fase Tumbuh:** *Seed (benih) $\to$ Sprout (tunas) $\to$ Leaf (daun) $\to$ Mature (siap panen)*.
-- **Pergantian Hari & Cuaca:** Tanaman bertumbuh otomatis saat jam dunia berganti pagi (pukul 06:00) atau disiram air hujan.
-- **Proteksi Panen Aman:** Mencegah kehilangan hasil panen bila kapasitas tas inventaris sedang penuh (*Safe Harvest Abort*).
+- **Pergantian Hari & Cuaca:** Tanaman tumbuh otomatis saat pergantian hari (pukul 06:00) atau tersiram secara alami saat cuaca hujan.
+- **Proteksi Panen Aman:** Mencegah hasil panen hilang apabila kapasitas tas inventaris sedang penuh (*Safe Harvest Abort*).
 
-### 2. 🏡 Dunia Isometrik 32×32 Terbuka (Phase 1 & 3 — Selesai)
-- **True 2:1 Isometric Projection:** Perhitungan matematis koordinat $64\text{px} \times 32\text{px}$ dengan *inverse screen-to-tile hit-testing*.
-- **Dynamic Foot-Y Depth Sorting:** Z-ordering presisi berbasis tapak kaki ($500 + \text{footY}$) memastikan Joni dan NPC ter-render natural di depan atau di belakang pohon dan bangunan.
-- **Two-Axis Collision Sliding:** NavGrid 2D dengan resolusi tumbukan dua sumbu independen agar karakter dapat meluncur mulus di sepanjang dinding atau sudut rintangan.
-- **Bangunan & Landmark Ikonik:** Pondok Joni, Paviliun Kebun Suri, Kios Pasar Nara, Bengkel Besi Bima, Dermaga Pancing Kolam Nila, dan Gerbang Hutan Lumut.
+### 2. 🏡 Dunia Isometrik 36×36 & Two-Axis Collision Sliding
+- **True 2:1 Isometric Projection:** Perhitungan matematis presisi $64\text{px} \times 32\text{px}$ dengan *inverse screen-to-tile hit-testing*.
+- **Dynamic Foot-Y Depth Sorting:** Z-ordering presisi berbasis tapak kaki ($500 + \text{footY}$) memastikan karakter dan NPC ter-render natural di depan maupun di belakang objek kanopi.
+- **Two-Axis Collision Sliding:** NavGrid 2D dengan resolusi tumbukan dua sumbu independen agar karakter meluncur mulus di sepanjang dinding atau sudut rintangan tanpa tersangkut.
+- **Responsivitas Layar:** Mode `Phaser.Scale.RESIZE` memenuhi layar secara adaptif, kontrol zoom kamera 50%–175%, serta pemisahan kontrol sentuh virtual D-pad dan hotbar pada perangkat mobile portrait.
 
-### 3. 💬 Dialog Desa Bercabang & Sistem Sosial (Phase 3 — Selesai)
-- **Naskah Indonesia Pedesaan Hangat:** Ditulis dengan gaya bahasa tutur nusantara yang sopan, santun, dan mengalir natural tanpa gaya terjemahan kaku.
-- **Potret Bust Pixel-Art (128×128):** Tampilan dialog modal bergaya perkamen dan kayu dengan animasi potret ekspresif.
+### 3. 💬 Warga Desa, Dialog Bertutur Nusantara & Sistem Sosial
+- **Tiga Karakter Ikonik:** **Nenek Suri** (penjaga kebun komunitas), **Nara** (pengelola kios bibit & hasil tani), dan **Paman Bima** (pandai besi & kerajinan).
+- **Naskah Indonesia Pedesaan Hangat:** Ditulis dengan gaya tutur ramah nusantara yang santun dan mengalir natural tanpa gaya terjemahan kaku.
+- **Potret Bust Pixel-Art (128×128):** Tampilan dialog modal bergaya kertas perkamen dengan animasi potret ekspresif.
 - **Sistem Hubungan Warga (RelationshipSystem):** Skor afeksi 0–100, sapaan harian (`talkedToday` +2 poin), bonus misi (+8 poin), serta 3 tingkatan hubungan (*Kenalan*, *Sahabat Lembah*, *Keluarga Lembah*).
-- **Logika Hadap Otomatis (`facePlayer`):** NPC otomatis memutar arah hadap memandang Joni saat diajak berinteraksi.
 
-### 4. 📜 Finite State Machine Misi & Idempotent Rewards (Phase 3 — Selesai)
+### 4. 📜 Finite State Machine Misi & Idempotent Rewards
 - **3 Beat Narasi Terhubung:**
   1. *Benih Pertama (Nenek Suri):* Mencangkul, menanam, menyiram, dan memanen Sunroot.
-  2. *Tangan untuk Desa (Paman Bima):* Mengumpulkan Kayu Rimba dan Batu Kali untuk rangka lentera festival.
+  2. *Tangan untuk Desa (Paman Bima):* Mengumpulkan Kayu Rimba dan Batu Kali untuk rangka lentera desa.
   3. *Lentera untuk Semua (Nara):* Melengkapi seserahan hasil kebun matang menyambut Malam Lentera Panen.
-- **Pelacakan Event Terdesentralisasi:** Memanfaatkan `EventBus` (`PLOT_WATERED`, `CROP_HARVESTED`, `ITEM_ACQUIRED`, `NPC_TALKED`).
-- **Idempotent Reward Token:** Hadiah dilindungi token unik (`reward_token_${questId}`) yang menjamin imbalan uang, item, dan poin afeksi tidak dapat diduplikasi saat percakapan ulang atau muat save.
+- **Idempotent Reward Token:** Hadiah dilindungi token unik (`reward_token_${questId}`) yang menjamin imbalan uang, item, dan poin afeksi tidak dapat diduplikasi saat percakapan ulang atau muat ulang penyimpanan (*save reload*).
 
-### 5. 🎒 Tas Inventaris 16-Slot & Jurnal Misi (Phase 2 & 3 — Selesai)
-- **Manajemen Slot Cerdas:** Fitur klik-pilih untuk menukar (*swap*) posisi atau menggabungkan tumpukan (*stack merge* hingga 99 item).
-- **Quick Hotbar 4-Slot:** Akses instan alat cangkul, penyiram, dan benih melalui tombol `1`–`4` atau sentuhan layar.
-- **Jurnal Misi (`J`):** Menampilkan daftar misi aktif, ceklis penyelesaian target `[✓]`, dan hadiah secara real-time.
+### 5. 🎒 Tas Inventaris 16-Slot, Hotbar & Jurnal Misi
+- **Manajemen Slot Cerdas:** Fitur klik-pilih untuk menukar (*swap*) posisi atau menumpuk (*stack merge* hingga batas 99 item).
+- **Quick Hotbar 4-Slot:** Akses instan cangkul, penyiram air, dan benih melalui tombol `1`–`4` atau ketukan layar sentuh.
+- **Jurnal Misi (`J`):** Menampilkan daftar misi aktif, ceklis pemenuhan target `[✓]`, dan hadiah secara langsung.
+
+### 6. 💾 Sistem Persistensi Multi-Slot IndexedDB (`lembah-rimbun-db`)
+- **Tiga Slot Penyimpanan Independen:** Pemilihan slot, penamaan nama karakter pemain (hingga 24 karakter), dan 3 variasi warna busana awal.
+- **Penyimpanan Transaksional Atomik:** Penulisan snapshot data cadangan (*backup*) lalu snapshot utama dalam satu transaksi `readwrite` IndexedDB yang aman.
+- **Deteksi Korupsi & Pemulihan:** Validasi integritas skema data saat muat save, isolasi penghapusan slot tanpa memengaruhi slot lain, serta modal persetujuan pemulihan (*recovery consent*) jika file utama rusak.
+- **Autosave Serial Queue & In-Memory Fallback:** Antrean autosave ter-debounce mencegah race condition, dilengkapi fallback in-memory session transparan jika IndexedDB diblokir browser sandbox/incognito.
+
+### 7. ⛏️ Gathering Kayu/Batu & Minigame Memancing Kolam Nila
+- **Node Tambang & Foraging:** 6 mineral tambang di Tambang Batu Embun (3 pukulan cangkul/beliung dengan visual retak/puing) dan 5 titik foraging di Hutan Lumut dengan reset deterministik tiap pagi.
+- **Minigame Memancing Kolam Nila:** Mekanik tahan/lepas (*hold/release capture bar*) via Spasi atau tombol sentuh pada dermaga kolam nila. Tangkapan ikan (*Riverfish* & *Silverfin*) bersifat deterministik tanpa resiko kehilangan alat atau *softlock*.
+
+### 8. 🐾 Sahabat Pendamping Kiko (Pet AI System)
+- **Logika Mengikuti (Breadcrumb Trail AI):** Kiko mengikuti Joni secara dinamis dengan perekaman jalur langkah, status istirahat santai saat Joni diam, dan teleportasi pemulihan otomatis jika terpisah jauh atau terhalang.
+- **Interaksi Elus Harian (*Petting*):** Pemain dapat mengelus Kiko sekali per hari game untuk meningkatkan status afeksi (+3 poin) disertai animasi reaksi senang. Status dan posisi Kiko tersimpan persisten.
+
+### 9. 🔨 Meja Kerajinan, Memasak Dapur & Alkimia
+- **Bengkel Besi Bima:** Resep kerajinan kotak pot tanaman (`planter_box`), rangka lentera (`lantern_frame`), dan peningkatan penyiram air (`watering_can_upgrade`).
+- **Dapur Pondok & Meja Alkimia:** Memasak sup herba (*Herb Soup*), pai beri (*Berry Pie*), dan ramuan tonik embun (*Dew Tonic*).
+- **Transaksi Validasi Atomik:** Seluruh kerajinan memvalidasi stok bahan dan ruang tas secara ketat sebelum mutasi dilakukan (*no item loss*).
+
+### 10. 🛋️ Dekorasi Interior Pondok & Cuaca/Malam Lentera Panen
+- **Interior Pondok (Grid 6×6):** Penempatan furnitur (karpet tenun, pot tanaman, rak) dengan pratinjau grid flat (hijau sage jika valid, terakota merah jika terhalang pintu/kasur).
+- **Simulasi Cuaca & Siang/Malam:** Siklus cuaca deterministik (cerah, berawan, hujan penyiram tanaman) dengan overlay langit malam transparan halus tanpa efek glow berlebihan.
+- **Festival Malam Lentera Panen:** Terbuka setelah penyelesaian misi ketiga. Alun-alun desa dihiasi lentera temaram, warga desa berkumpul, dan perayaan ditutup dengan pembagian hadiah festival.
+
+### 11. 🎵 Synthesizer Audio Prosedural Web Audio API
+- **Efek Suara Prosedural Halus:** Efek langkah kaki, ayunan cangkul, percikan air, petikan panen, dan dentang tambang disintesis langsung menggunakan Web Audio API tanpa dependensi file audio eksternal yang berat.
+- **Autoplay-Safe Bridge:** Memenuhi kebijakan autoplay browser modern dengan mengaktifkan konteks audio secara aman pada interaksi/gesture pertama pengguna.
+- **Pengaturan Suara Komprehensif:** Panel pengaturan volume suara (Master, Music, SFX) dengan saklar Mute yang tersimpan pada preferensi `appMeta`.
 
 ---
 
 ## 🛠️ Tech Stack & Arsitektur
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                 PRESENTATION LAYER (DOM/CSS)                │
-│   HUDController  •  MenuController  •  DialoguePanel        │
-│   (Parchment UI, 44px+ touch targets, CSS Design Tokens)    │
-└──────────────────────────────▲──────────────────────────────┘
-                               │ EventBus / Input Freeze
-┌──────────────────────────────▼──────────────────────────────┐
-│                  SCENE LIFECYCLE (Phaser 3.88)              │
-│   BootScene ──► PreloadScene ──► TitleScene ──► GameScene    │
-│                                           │        │        │
-│                                           ▼        ▼        │
-│                                        UIScene  WorldClock  │
-└──────────────────────────────▲──────────────────────────────┘
-                               │
-┌──────────────────────────────▼──────────────────────────────┐
-│                    DOMAIN SIMULATION SYSTEMS                │
-│   MovementSystem     • InteractionSystem • FarmingSystem    │
-│   RelationshipSystem • QuestSystem (FSM) • DialogueSystem   │
-└──────────────────────────────▲──────────────────────────────┘
-                               │
-┌──────────────────────────────▼──────────────────────────────┐
-│                  WORLD & GEOMETRY FOUNDATION                │
-│   isoMath (2:1)      • NavGrid (Sliding) • DepthSorter      │
-│   IsoWorldRenderer   • ZoneDefinitions (32x32 Lembah)       │
-└─────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                      PRESENTATION LAYER (DOM/CSS)                      │
+│   HUDController  •  MenuController  •  DialoguePanel  •  LifePanels    │
+│   TitleMenu      •  Phase4Panels    •  SettingsView   •  CSS Tokens    │
+│   (Parchment UI, Touch Targets ≥ 44px, Safe-Area & Viewport Adaptive)  │
+└───────────────────────────────────▲────────────────────────────────────┘
+                                    │ EventBus / Input Freeze
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                       SCENE LIFECYCLE (Phaser 3.88.2)                  │
+│   BootScene ──► PreloadScene ──► TitleScene ──► GameScene (RESIZE)     │
+│                                                     │        │         │
+│                                                     ▼        ▼         │
+│                                                  UIScene  WorldClock   │
+└───────────────────────────────────▲────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                         DOMAIN SIMULATION SYSTEMS                      │
+│   MovementSystem      • InteractionSystem  • FarmingSystem (12 Plots)  │
+│   RelationshipSystem  • QuestSystem (FSM)  • DialogueSystem            │
+│   EconomySystem       • CraftingSystem     • FishingSystem             │
+│   ResourceSystem      • PetSystem (Kiko)   • DecorationSystem (Grid)   │
+│   FestivalSystem      • AudioSystem (WebAudio API)                     │
+└───────────────────────────────────▲────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                       BACKEND & PERSISTENCE LAYER                      │
+│   SaveRepository (IndexedDB) • SaveSerializer • SaveManager (Autosave) │
+│   SettingsRepository         • Schema Migrations (Idempotent)          │
+└───────────────────────────────────▲────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                       WORLD & GEOMETRY FOUNDATION                      │
+│   isoMath (2:1 64x32)  • NavGrid (Two-Axis Sliding) • DepthSorter      │
+│   IsoWorldRenderer     • ZoneDefinitions (36x36 Desa Lembah Rimbun)    │
+│   WorldAtmosphere      • LifeWorld Interactions                        │
+└────────────────────────────────────────────────────────────────────────┘
 ```
-
-- **Core Engine:** [Phaser 3.88.2](https://phaser.io/)
-- **Module Format:** Native ECMAScript Modules (ESM)
-- **UI Architecture:** Decoupled DOM overlay (`UIScene`) dengan Zero UI Framework overhead
-- **Persistensi Data:** IndexedDB & JSON Storage Serialization
-- **Automated Testing:** Node.js native assert test runner (ESM)
-- **Asset Pipeline:** Python 3.12 (Pillow / OpenCV) Nearest-Neighbor slicer
 
 ---
 
-## 🗺️ Tata Letak Dunia (32×32 Lembah Rimbun)
+## 🗺️ Tata Letak Dunia (36×36 Lembah Rimbun)
 
-Peta permainan berukuran **32×32 ubin isometrik** yang menghubungkan empat area tematik:
+Peta permainan berukuran **36×36 ubin isometrik** dengan konektivitas jalan setapak selebar 2 tile yang menghubungkan seluruh fasilitas desa:
 
 ```
-                          [UTARA]
-                 (12,4) Paviliun Suri ── [Nenek Suri]
-                           │
-  (6,4) Pondok Joni ───────┴──────── (22,5) Kios Pasar ── [Nara]
-         │ (Pintu & Kasur)  │                 │
-  (4,10) 12 Petak Kebun     │           Alun-alun Desa
-         │ (Terasering)     │        (Lentera Festival)
-         │                  │                 │
-  (6,22) Dermaga Pancing    └─────── (19,14) Bengkel Besi ── [Paman Bima]
-         │ (Kolam Nila)                       │
-  [BARAT]└────────────────────────── (28,12) Gerbang Hutan & Tambang [TIMUR]
-                          [SELATAN]
+                                  [UTARA]
+                         (14,4) Paviliun Suri ── [Nenek Suri]
+                                   │
+  (5,5) Pondok Joni ───────────────┴─────────────── (24,5) Kios Pasar ── [Nara]
+         │ (Kasur & Dekorasi)      │                       │
+  (4,10) 12 Petak Kebun            │                 Alun-alun Desa
+         │ (Terasering)            │              (Lentera Festival)
+         │                         │                       │
+  (6,22) Dermaga Pancing           └─────────────── (20,15) Bengkel Besi ── [Bima]
+         │ (Kolam Nila)                                    │
+  [BARAT]└───────────────────────────────────────── (30,12) Gerbang Hutan & Tambang [TIMUR]
+                                  [SELATAN]
 ```
 
 ---
@@ -160,15 +195,15 @@ Permainan mendukung kontrol penuh menggunakan **Keyboard / Mouse** maupun **Laya
 | **Pilih Slot Hotbar** | Angka `1`, `2`, `3`, `4` | Ketuk Slot Hotbar |
 | **Buka/Tutup Tas (16 Slot)** | Tombol `I` | Tombol `🎒 Tas [I]` di HUD |
 | **Buka/Tutup Jurnal Misi** | Tombol `J` | Tombol `📜 Jurnal [J]` di HUD |
-| **Pilih Opsi Dialog** | Angka `1`–`9` / `E` / `Spasi` | Ketuk Opsi Pilihan Dialog |
-| **Tidur & Maju ke Pagi** | Dekati Kasur lalu tekan `E` | Dekati Kasur lalu ketuk Aksi |
+| **Kontrol Zoom Kamera** | Scroll Mouse atau Tombol `+` / `-` (Reset `0`) | Tombol Zoom `[100%]` di HUD |
+| **Pilih Opsi Dialog** | Angka `1`–`9` / `E` / `Spasi` | Ketuk Pilihan Opsi Dialog |
+| **Tidur & Maju ke Pagi** | Dekati Kasur Pondok lalu tekan `E` | Dekati Kasur lalu ketuk Aksi |
+| **Buka Pengaturan Suara** | Tombol Pengaturan di Menu Utama / HUD | Ketuk Ikon Pengaturan di HUD |
 | **Tutup Modal / Batalkan** | Tombol `Esc` | Tombol `✕` di Pojok Modal |
 
 ---
 
-## 🚀 Menjalankan Permainan Lokal
-
-Karena arsitektur game ini murni berbasis ES Modules peramban tanpa build tools, Anda dapat menjalankannya langsung menggunakan server HTTP statis standar:
+## 🚀 Menjalankan Permainan & Build Produksi
 
 ### 1. Clone Repositori
 ```bash
@@ -176,51 +211,64 @@ git clone https://github.com/tamaproject360/season-of-home.git
 cd season-of-home
 ```
 
-### 2. Jalankan Server Lokal
-Pilih salah satu metode server berikut:
+### 2. Jalankan Server Pengembangan Lokal
+Pilih salah satu metode berikut:
 
-**Opsi A (Python 3 — Rekomendasi):**
+**Opsi A (Node.js npm — Rekomendasi):**
 ```bash
-python -m http.server 8080
+npm start
 ```
 
-**Opsi B (Node.js npx):**
+**Opsi B (Python 3):**
 ```bash
-npx serve -l 8080
+python -m http.server 8080 --directory "d:\GAME\SOH"
 ```
 
-### 3. Buka di Browser
-Buka tautan berikut di peramban modern (Chrome, Edge, Firefox, Safari):
+Buka di peramban: `http://localhost:8080`
+
+### 3. Membangun Bundle Produksi Mandiri (`dist/`)
+Untuk menghasilkan distribusi bundle statis mandiri bebas dependensi:
+```bash
+npm run build
 ```
-http://localhost:8080
+Bundle akan terkompilasi ke dalam folder `dist/` lengkap dengan manifest integritas berkas (`build-manifest.json`).
+
+Jalankan preview bundle produksi:
+```bash
+npm run preview
+# Membuka http://localhost:8001
 ```
 
 ---
 
 ## 🧪 Pengujian Unit Otomatis
 
-Seluruh logika matematika isometrik, transaksi kapasitas inventaris, siklus pertumbuhan tanaman, dan alur FSM misi dilindungi oleh rangkaian test suite unit otomatis:
+Seluruh logika matematika isometrik, transaksi inventaris, siklus pertumbuhan tanaman, FSM misi narasi, persistensi IndexedDB, sistem kehidupan desa, dan synthesizer audio dilindungi oleh **11 test suites unit otomatis**:
 
 ```bash
-# Menjalankan seluruh test suite sekaligus
+# Menjalankan seluruh 11 unit test suite sekaligus:
 npm test
+
+# Menjalankan pengujian integritas bundle mandiri:
+npm run test:build
 ```
 
-### Rincian Test Suite:
-```bash
-node tests/isoMath.test.js    # Invariant proyeksi tileToScreen <-> screenToTile (akurasi ±1e-6)
-node tests/inventory.test.js  # Batas stack 99, penolakan saat penuh, dan slot swap/merge
-node tests/farming.test.js    # 4 siklus tumbuh tanaman dan pembatalan panen aman
-node tests/quests.test.js     # FSM quest, tangkapan domain events, dan token reward idempoten
-```
+### Rincian Cakupan Test Suite:
 
-Output pengujian:
-```text
-✓ All isoMath tests PASSED successfully!
-✓ All InventorySystem unit tests PASSED successfully!
-✓ All FarmingSystem unit tests PASSED successfully!
-✓ All QuestSystem unit tests PASSED successfully!
-```
+| Test Suite | Peran & Invariant yang Diuji |
+|---|---|
+| `tests/isoMath.test.js` | Akurasi bolak-balik transformasi `tileToScreen` $\leftrightarrow$ `screenToTile` (toleransi $\pm 10^{-6}$). |
+| `tests/inventory.test.js` | Batas kapasitas 16 slot, tumpukan item maks 99, penolakan saat penuh, dan slot swap/merge. |
+| `tests/farming.test.js` | 4 fase pertumbuhan tanaman, pembaruan hari basah/kering, dan proteksi panen aman saat tas penuh. |
+| `tests/quests.test.js` | Transisi status FSM misi narasi (3 beat) dan jaminan token hadiah idempoten anti-duplikasi. |
+| `tests/zoneLayout.test.js` | Konektivitas jalan desa terpadu 36×36, integritas dermaga, dan keterjangkauan seluruh NPC. |
+| `tests/cameraControls.test.js` | Kontrol zoom keyboard/wheel, batas clamping kamera, dan deadzone anti-jitter. |
+| `tests/transactions.test.js` | Validasi atomik transaksi jual-beli kios, kerajinan bengkel, dan mekanisme rollback kegagalan. |
+| `tests/save-roundtrip.test.js` | Integritas siklus serialisasi/deserialisasi snapshot JSON murni bebas siklis DOM/Phaser. |
+| `tests/persistence.test.js` | Isolasi ketat 3 slot IndexedDB, penulisan atomik backup, toleransi data korup, dan fallback session. |
+| `tests/lifeSystems.test.js` | Gathering/mining 3-hit, minigame pancing Kolam Nila, resep dapur/alkimia, dekorasi, Kiko, dan festival. |
+| `tests/audio.test.js` | Web Audio API procedural synthesizer, kebijakan resume gesture, dan kontrol gain live volume. |
+| `tests/build.test.js` | Verifikasi 195+ aset dan modul dalam bundle `dist/` mandiri bebas referensi `node_modules` atau file mentah. |
 
 ---
 
@@ -228,32 +276,38 @@ Output pengujian:
 
 ```
 d:\GAME\SOH\
-├── index.html                  # Dokumen utama & mounting canvas game
-├── package.json                # Skrip test runner & konfigurasi proyek
+├── index.html                  # Entry point aplikasi web & mounting canvas Phaser
+├── package.json                # Dependensi, konfigurasi test runner, & build scripts
 ├── blueprint.md                # Dokumen master game design v1.0
-├── task.md                     # Pelacak WBS bertahap (Phase 0 - 6)
-├── asset/                      # Seluruh aset visual pixel art terpotong
-│   ├── building/               # Tekstur bangunan (pondok, bengkel, kios, dll.)
-│   ├── characters/             # Spritesheet karakter 313x313 & potret 256x256
-│   ├── crops/                  # Varietas tanaman stage 1 s/d 4
-│   ├── items/                  # Alat pertanian, bibit, koin, dan hasil panen
-│   ├── nature/                 # Pohon tropis, semak, batu bijih, dan lentera
-│   └── terrain/                # Ubin rumput, jalan setapak, dermaga kolam
-├── docs/
-│   └── specs.md                # Spesifikasi arsitektur komprehensif untuk Agentic AI
+├── task.md                     # Master WBS tasklist (Phase 0 - 6 selesai 100%)
+├── asset/                      # Seluruh aset visual pixel-art terpotong
+│   ├── building/               # Bangunan eksterior & interior (pondok, kios, bengkel)
+│   ├── characters/             # Spritesheets karakter 4x4 (313x313) & potret bust 128x128
+│   ├── crops/                  # Varietas tanaman (Sunroot, Mossberry, Goldenleaf stage 1-4)
+│   ├── items/                  # Perkakas pertanian, bibit, hasil panen, material tambang
+│   ├── nature/                 # Pohon tropis, semak, node tambang, lentera festival
+│   └── terrain/                # Ubin rumput, jalan tanah, petak kebun, dermaga pancing
+├── docs/                       # Dokumentasi arsitektur resmi
+│   ├── specs.md                # Spesifikasi arsitektur komprehensif untuk Agentic AI
+│   ├── task.md                 # Checkpoint log penyelesaian fase
+│   └── changelog.md            # Log riwayat perubahan proyek berkelanjutan
 ├── lib/
-│   └── phaser.min.js           # Phaser engine bundle 3.88.2
-├── src/
-│   ├── config/                 # Konstanta game & palet anti-slop
-│   ├── data/                   # Katalog tanaman, item, quest, dan naskah dialog
-│   ├── entities/               # Player (Joni), NPC, dan FarmPlot
-│   ├── input/                  # Router input multi-platform (Desktop & Touch)
-│   ├── scenes/                 # BootScene, PreloadScene, TitleScene, GameScene, UIScene
-│   ├── styles/                 # Desain token CSS & styling UI
-│   ├── systems/                # Gerak, interaksi, bertani, hubungan, quest, dan dialog
-│   ├── ui/                     # Kontroller HUD, Menu Modal, dan Dialog Panel
-│   ├── utils/                  # EventBus pub/sub & kalkulasi matematika
-│   └── world/                  # Grid navigasi, depth sorting, dan definisi ubin 32x32
+│   └── phaser.min.js           # Bundle Phaser engine 3.88.2 lokal
+├── scripts/                    # Skrip otomasi rilis
+│   ├── build.mjs               # Script build bundle mandiri ke dist/
+│   └── serve.mjs               # Server lokal preview berbasis Node.js
+├── src/                        # Sumber kode aplikasi permainan (Native ESM)
+│   ├── config/                 # Parameter konfigurasi & palet kurasi anti-slop
+│   ├── data/                   # Katalog tanaman, item, misi narasi, dialog, & resep
+│   ├── entities/               # Player (Joni), NPC, Kiko (Pet), FarmPlot, & ResourceNode
+│   ├── input/                  # Router input multi-platform (Desktop, Touch, & Camera)
+│   ├── persistence/            # Arsitektur IndexedDB (SaveRepo, Serializer, Settings, Migrasi)
+│   ├── scenes/                 # BootScene, PreloadScene, TitleScene, GameScene, & UIScene
+│   ├── styles/                 # Desain token CSS (tokens.css) & layout UI (ui.css)
+│   ├── systems/                # 14 subsistem domain simulasi gameplay & Web Audio API
+│   ├── ui/                     # Kontroler HUD, Menu Tas/Jurnal, Dialog, Kios, & Pengaturan
+│   ├── utils/                  # EventBus pub/sub, rumus jarak, & PRNG deterministik
+│   └── world/                  # Matematika 2:1, NavGrid, DepthSorter, Kalender, & Suasana
 └── tests/                      # Suite unit test otomatis
 ```
 
@@ -261,20 +315,19 @@ d:\GAME\SOH\
 
 ## 📈 Roadmap Pengembangan
 
-Berdasarkan dokumen perencanaan [task.md](task.md):
+Berdasarkan master tasklist perencanaan teknis [task.md](task.md):
 
-- [x] **Phase 0:** Fondasi Sistem, Palet Kurasi, Pipeline Pemotongan Aset & Booting
-- [x] **Phase 1:** Mesin Isometrik 2:1, Pergerakan Dua Sumbu, NavGrid, Depth Sorting & Multi-Input
-- [x] **Phase 2:** Sistem Pertanian Terasering (12 Petak), Tas 16-Slot, Jam Dunia, & HUD UI
-- [x] **Phase 3:** Entitas NPC, Dialog Bercabang Bahasa Indonesia, Hubungan Sosial, FSM Quest, & Dunia Luas 32×32
-- [ ] **Phase 4:** Sistem Persistensi IndexedDB Multi-Slot & Kustomisasi Karakter
-- [ ] **Phase 5:** Gathering Kayu/Batu, Minigame Pancing Kolam Nila, & Companion Pet Kiko
-- [ ] **Phase 6:** Meja Kerajinan (Crafting), Audio Prosedural Web Audio, & Polish Malam Lentera Panen
+- [x] **Phase 0:** Fondasi Sistem, Palet Kurasi Anti-Slop (14 Warna), Pipeline Aset & Booting
+- [x] **Phase 1:** Mesin Isometrik 2:1, NavGrid Pergerakan Dua Sumbu, Dynamic Depth Sorting & Multi-Input
+- [x] **Phase 2:** Sistem Pertanian Terasering (12 Petak), Tas 16-Slot, Jam Dunia 24 Jam & Adaptive HUD
+- [x] **Phase 3:** Entitas NPC, Dialog Bertutur Nusantara Bercabang, Hubungan Sosial, FSM Misi & Peta 36×36
+- [x] **Phase 4:** Sistem Persistensi IndexedDB Multi-Slot (3 Slot), Kustomisasi Karakter, Transaksi & Backup
+- [x] **Phase 5:** Gathering/Mining, Minigame Pancing Kolam Nila, Sahabat Pet Kiko, Kerajinan/Dapur, Dekorasi Interior & Malam Lentera Panen
+- [x] **Phase 6:** Web Audio API Procedural Synthesizer, Responsivitas Mobile Penuh (RESIZE), Audit Anti-Slop, Bundler Mandiri (`dist/`) & QA Release
 
 ---
 
-
 <div align="center">
-  <sub>Dibangun dengan dedikasi untuk menghadirkan pengalaman simulasi pedesaan yang menenangkan dan hangat.</sub><br/>
+  <sub>Dibangun dengan dedikasi untuk menghadirkan pengalaman simulasi pedesaan Nusantara yang menenangkan dan hangat.</sub><br/>
   <strong>Seasons of Home © 2026 Lembah Rimbun Project</strong>
 </div>

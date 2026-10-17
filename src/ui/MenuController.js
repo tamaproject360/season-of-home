@@ -31,7 +31,7 @@ export class MenuController {
     this.backdrop.innerHTML = `
       <div class="modal-window" id="inventory-modal">
         <div class="modal-header">
-          <div class="modal-title">🎒 Tas Penyimpanan (16 Slot)</div>
+          <div class="modal-title">Tas Penyimpanan (16 Slot)</div>
           <button class="modal-close-btn" id="btn-close-inventory" title="Tutup (Esc)">✕</button>
         </div>
         <div class="inventory-grid" id="inventory-grid-container">
@@ -60,7 +60,7 @@ export class MenuController {
     this.journalBackdrop.innerHTML = `
       <div class="modal-window" id="journal-modal" style="width: 580px;">
         <div class="modal-header">
-          <div class="modal-title">📜 Jurnal Misi Desa</div>
+          <div class="modal-title">Jurnal Misi Desa</div>
           <button class="modal-close-btn" id="btn-close-journal" title="Tutup (Esc)">✕</button>
         </div>
         <div id="journal-quest-list" style="display:flex;flex-direction:column;gap:12px;max-height:360px;overflow-y:auto;padding-right:4px;">
@@ -116,7 +116,9 @@ export class MenuController {
     }
 
     // Keyboard 'I' for inventory, 'J' for journal, 'Escape' to close
-    window.addEventListener('keydown', (e) => {
+    this.keyHandler = (e) => {
+      if (e.target.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+      if (this.worldClock.isFrozen && !this.isOpen && !this.isJournalOpen) return;
       if (e.key === 'i' || e.key === 'I') {
         this.toggleInventory();
       } else if (e.key === 'j' || e.key === 'J') {
@@ -125,10 +127,11 @@ export class MenuController {
         if (this.isOpen) this.closeInventory();
         if (this.isJournalOpen) this.closeJournal();
       }
-    });
+    };
+    window.addEventListener('keydown', this.keyHandler);
 
     // Sync when inventory updates
-    this.inventory.onChange(() => {
+    this.unsubscribeInventory = this.inventory.onChange(() => {
       if (this.isOpen) {
         this.renderSlots();
       }
@@ -136,7 +139,7 @@ export class MenuController {
 
     // Sync when quests update
     if (this.questSystem && this.questSystem.onChange) {
-      this.questSystem.onChange(() => {
+      this.unsubscribeQuest = this.questSystem.onChange(() => {
         if (this.isJournalOpen) {
           this.renderJournal();
         }
@@ -239,6 +242,7 @@ export class MenuController {
   }
 
   openInventory() {
+    if (this.isJournalOpen) this.closeJournal();
     this.isOpen = true;
     this.selectedSlotIndex = null;
     this.renderSlots();
@@ -336,7 +340,7 @@ export class MenuController {
       return;
     }
 
-    const priceText = itemDef.sellable ? `Harga jual: ${itemDef.sellPrice} 🍃` : 'Tidak dapat dijual (Item penting)';
+    const priceText = itemDef.sellable ? `Harga jual: ${itemDef.sellPrice} koin daun` : 'Tidak dapat dijual (Item penting)';
     const countText = slot ? ` • Jumlah: ${slot.count}` : '';
     this.detailsContainer.innerHTML = `
       <div class="item-title">${itemDef.name} <span style="font-size:12px;color:#87674E;">[${itemDef.category.toUpperCase()}]${countText}</span></div>
@@ -346,6 +350,9 @@ export class MenuController {
   }
 
   destroy() {
+    window.removeEventListener('keydown', this.keyHandler);
+    this.unsubscribeInventory?.();
+    this.unsubscribeQuest?.();
     if (this.backdrop) this.backdrop.remove();
     if (this.journalBackdrop) this.journalBackdrop.remove();
   }

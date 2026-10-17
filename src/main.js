@@ -4,6 +4,7 @@ import { PreloadScene } from './scenes/PreloadScene.js';
 import { TitleScene } from './scenes/TitleScene.js';
 import { GameScene } from './scenes/GameScene.js';
 import { UIScene } from './scenes/UIScene.js';
+import { observeViewport } from './input/ResponsiveViewport.js';
 
 /**
  * Main Game Bootstrap
@@ -14,19 +15,20 @@ const config = {
   parent: 'game-container',
   width: VIEWPORT.WIDTH,
   height: VIEWPORT.HEIGHT,
-  pixelArt: false,
-  antialias: true,
+  pixelArt: true,
+  antialias: false,
   roundPixels: true,
   backgroundColor: '#304B43',
   scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH
+    mode: Phaser.Scale.RESIZE,
+    autoCenter: Phaser.Scale.NO_CENTER
   },
   scene: [BootScene, PreloadScene, TitleScene, GameScene, UIScene]
 };
 
 window.addEventListener('DOMContentLoaded', () => {
   const game = new Phaser.Game(config);
+  observeViewport(game, document.getElementById('game-container'));
   window.__SOH_GAME__ = game;
   console.log('[Main] Seasons of Home game initialized successfully.');
 });

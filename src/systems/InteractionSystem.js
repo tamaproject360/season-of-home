@@ -15,6 +15,7 @@ export class InteractionSystem {
     this.currentTarget = null;
     this.lastTriggerTime = 0;
     this.debounceMs = 300;
+    this.extraTargets = () => [];
   }
 
   setInteractives(interactives) {
@@ -28,6 +29,8 @@ export class InteractionSystem {
   setNPCs(npcs) {
     this.npcs = npcs;
   }
+
+  setExtraTargets(provider) { this.extraTargets = provider; }
 
   update(player, activeItemId = null) {
     let closestTarget = null;
@@ -73,7 +76,7 @@ export class InteractionSystem {
     }
 
     // 3. Check static interactives (portals, doors, bed)
-    for (const item of this.interactives) {
+    for (const item of [...this.interactives, ...this.extraTargets()]) {
       const d = distance(player.tileX, player.tileY, item.tileX, item.tileY);
       if (d <= closestDist) {
         // Deterministic priority tie-break

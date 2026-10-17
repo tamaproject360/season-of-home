@@ -1,5 +1,6 @@
 import { QUESTS, getQuestDefinition } from '../data/quests.js';
 import { EventBus, EVENTS } from '../utils/EventBus.js';
+import { inventoryTransaction } from './inventoryTransaction.js';
 
 export const QUEST_STATES = {
   LOCKED: 'locked',
@@ -15,9 +16,10 @@ export const QUEST_STATES = {
  * domain event tracking, and idempotent reward granting.
  */
 export class QuestSystem {
-  constructor(inventory, relationshipSystem) {
+  constructor(inventory, relationshipSystem, wallet = { coins: 0 }) {
     this.inventory = inventory;
     this.relationshipSystem = relationshipSystem;
+    this.wallet = wallet;
 
     this.questStates = {};
     this.claimedRewardTokens = new Set();
@@ -55,13 +57,15 @@ export class QuestSystem {
   }
 
   bindDomainEvents() {
+    this.eventSubscriptions = [];
+    const listen = (event, callback) => this.eventSubscriptions.push(EventBus.on(event, callback));
     // 1. Water plot event
-    EventBus.on(EVENTS.PLOT_WATERED, () => {
+    listen(EVENTS.PLOT_WATERED, () => {
       this.handleObjectiveProgress('water_plot', 1);
     });
 
     // 2. Crop harvested event
-    EventBus.on(EVENTS.CROP_HARVESTED, ({ itemId, count }) => {
+    listen(EVENTS.CROP_HARVESTED, ({ itemId, count }) => {
       if (itemId === 'crop_sunroot') {
         this.handleObjectiveProgress('harvest_sunroot', count);
         this.handleObjectiveProgress('donate_sunroot', count);
@@ -71,7 +75,7 @@ export class QuestSystem {
     });
 
     // 3. Item acquired event
-    EventBus.on(EVENTS.ITEM_ACQUIRED, ({ itemId, count }) => {
+    listen(EVENTS.ITEM_ACQUIRED, ({ itemId, count }) => {
       if (itemId === 'wood') {
         this.handleObjectiveProgress('collect_wood', count);
       } else if (itemId === 'stone') {
@@ -80,7 +84,7 @@ export class QuestSystem {
     });
 
     // 4. NPC Talk event
-    EventBus.on(EVENTS.NPC_TALKED, ({ npcId }) => {
+    listen(EVENTS.NPC_TALKED, ({ npcId }) => {
       if (npcId === 'suri') {
         this.handleObjectiveProgress('deliver_suri', 1);
       } else if (npcId === 'bima') {
@@ -134,6 +138,10 @@ export class QuestSystem {
       return false;
     }
     q.state = QUEST_STATES.ACTIVE;
+    for (const [objective, itemId] of [['collect_wood', 'wood'], ['collect_stone', 'stone'],
+      ['donate_sunroot', 'crop_sunroot'], ['donate_mossberry', 'crop_mossberry']]) {
+      this.handleObjectiveProgress(objective, this.inventory.getItemCount(itemId));
+    }
     console.log(`[QuestSystem] Quest started: ${questId}`);
     this.emitChange();
     return true;
@@ -155,17 +163,15 @@ export class QuestSystem {
 
     const def = getQuestDefinition(questId);
     if (!def) return { success: false, reason: 'missing_definition' };
-
-    // Mark as claimed immediately
-    this.claimedRewardTokens.add(token);
-    q.state = QUEST_STATES.REWARDED;
-
-    // 1. Grant items to inventory
-    if (def.rewards.items && this.inventory) {
-      for (const it of def.rewards.items) {
-        this.inventory.addItem(it.itemId, it.count);
+    if (q.state !== QUEST_STATES.COMPLETED) return { success: false, reason: 'not_completed' };
+    const transaction = inventoryTransaction(this.inventory, this.wallet, {
+      outputs: def.rewards.items || [], coinDelta: def.rewards.coins || 0,
+      commit: () => {
+        this.claimedRewardTokens.add(token);
+        q.state = QUEST_STATES.REWARDED;
       }
-    }
+    });
+    if (!transaction.success) return { ...transaction, reason: 'inventory_full' };
 
     // 2. Grant friendship
     if (def.rewards.friendship && this.relationshipSystem) {
@@ -182,6 +188,7 @@ export class QuestSystem {
 
     console.log(`[QuestSystem] Reward granted for ${questId} with token ${token}.`);
     this.emitChange();
+    EventBus.emit(EVENTS.QUEST_REWARDED, { questId, flags: def.rewards.flags || [] });
 
     return {
       success: true,
@@ -204,5 +211,10 @@ export class QuestSystem {
       this.claimedRewardTokens = new Set(data.claimedRewardTokens);
     }
     this.emitChange();
+  }
+
+  destroy() {
+    this.eventSubscriptions.forEach(unsubscribe => unsubscribe());
+    this.listeners = [];
   }
 }

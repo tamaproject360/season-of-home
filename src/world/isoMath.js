@@ -22,12 +22,14 @@ export function screenToTile(sx, sy, originX = 0, originY = 0) {
 }
 
 export function worldScreenToTile(worldX, worldY, camera, originX = 0, originY = 0) {
-  // Account for camera scroll and zoom
-  const zoom = camera ? camera.zoom : 1;
-  const scrollX = camera ? camera.scrollX : 0;
-  const scrollY = camera ? camera.scrollY : 0;
-  
-  const sx = (worldX + scrollX) / zoom;
-  const sy = (worldY + scrollY) / zoom;
+  if (camera?.getWorldPoint) {
+    const point = camera.getWorldPoint(worldX, worldY);
+    return screenToTile(point.x, point.y, originX, originY);
+  }
+  const zoom = camera?.zoom ?? 1;
+  const centerX = (camera?.width ?? 0) / 2;
+  const centerY = (camera?.height ?? 0) / 2;
+  const sx = (worldX - (camera?.x ?? 0) - centerX) / zoom + centerX + (camera?.scrollX ?? 0);
+  const sy = (worldY - (camera?.y ?? 0) - centerY) / zoom + centerY + (camera?.scrollY ?? 0);
   return screenToTile(sx, sy, originX, originY);
 }

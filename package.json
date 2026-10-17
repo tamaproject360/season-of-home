@@ -1,19 +1,26 @@
 {
   "name": "soh",
-  "version": "1.0.0",
+  "version": "0.6.0",
   "description": "",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "node tests/isoMath.test.js && node tests/inventory.test.js && node tests/farming.test.js && node tests/quests.test.js && node tests/zoneLayout.test.js"
+    "start": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs dist 8001",
+    "test:build": "node tests/build.test.js",
+    "test": "node tests/isoMath.test.js && node tests/inventory.test.js && node tests/farming.test.js && node tests/quests.test.js && node tests/zoneLayout.test.js && node tests/cameraControls.test.js && node tests/transactions.test.js && node tests/save-roundtrip.test.js && node tests/persistence.test.js && node tests/lifeSystems.test.js && node tests/audio.test.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "phaser": "^3.88.2"
+    "phaser": "3.88.2"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.6"
+  }
 }

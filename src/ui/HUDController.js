@@ -28,6 +28,8 @@ export class HUDController {
     this.hudElement.id = 'hud-container';
     this.hudElement.innerHTML = `
       <div class="hud-group">
+        <span class="hud-panel save-status" id="hud-save-text" role="status">Belum tersimpan</span>
+        <button id="btn-open-pause" class="hud-btn" title="Menu permainan (Esc)">Menu [Esc]</button>
         <div class="hud-panel" id="hud-calendar">
           <span id="hud-season-text">Musim Semi • Hari 1</span>
         </div>
@@ -42,10 +44,10 @@ export class HUDController {
       </div>
       <div class="hud-group">
         <button id="btn-open-journal" class="hud-btn" title="Buka Jurnal Misi (J)" style="margin-right:6px;">
-          <span>📜 Jurnal [J]</span>
+          <span>Jurnal [J]</span>
         </button>
         <button id="btn-open-inventory" class="hud-btn" title="Buka Tas (I)">
-          <span>🎒 Tas [I]</span>
+          <span>Tas [I]</span>
         </button>
       </div>
     `;
@@ -88,20 +90,25 @@ export class HUDController {
     this.toastContainer = document.createElement('div');
     this.toastContainer.id = 'toast-container';
     this.container.appendChild(this.toastContainer);
+
+    this.zoomStatus = document.createElement('div');
+    this.zoomStatus.className = 'camera-zoom-status hud-panel';
+    this.container.appendChild(this.zoomStatus);
+    this.setZoomDisplay(1);
   }
 
   bindEvents() {
     // Listen to World Clock updates
-    this.worldClock.on('tick', () => {
+    this.unsubscribeTick = this.worldClock.on('tick', () => {
       this.updateClockDisplay();
     });
 
-    this.worldClock.on('day', () => {
+    this.unsubscribeDay = this.worldClock.on('day', () => {
       this.updateClockDisplay();
     });
 
     // Listen to inventory changes
-    this.inventory.onChange(() => {
+    this.unsubscribeInventory = this.inventory.onChange(() => {
       this.syncHotbarWithInventory();
     });
 
@@ -115,12 +122,14 @@ export class HUDController {
     });
 
     // Keyboard 1..4 quick select
-    window.addEventListener('keydown', (e) => {
+    this.keyHandler = (e) => {
+      if (this.worldClock.isFrozen || e.target.closest?.('input, textarea, select')) return;
       if (['1', '2', '3', '4'].includes(e.key)) {
         const idx = parseInt(e.key, 10) - 1;
         this.setActiveHotbarSlot(idx);
       }
-    });
+    };
+    window.addEventListener('keydown', this.keyHandler);
   }
 
   setActiveHotbarSlot(index) {
@@ -225,6 +234,20 @@ export class HUDController {
     }
   }
 
+  setZoomDisplay(zoom) {
+    const percent = Math.round(zoom * 100);
+    if (this.zoomPercent === percent) return;
+    this.zoomPercent = percent;
+    this.zoomStatus.textContent = `Zoom ${percent}% · Scroll / + − · 0 reset`;
+  }
+
+  setSaveStatus(status) {
+    const text = document.getElementById('hud-save-text');
+    if (!text) return;
+    text.textContent = status.message;
+    text.dataset.state = status.state;
+  }
+
   setContextPrompt(text) {
     if (!text) {
       this.contextPrompt.style.display = 'none';
@@ -248,9 +271,14 @@ export class HUDController {
   }
 
   destroy() {
+    this.unsubscribeTick?.();
+    this.unsubscribeDay?.();
+    this.unsubscribeInventory?.();
+    window.removeEventListener('keydown', this.keyHandler);
     if (this.hudElement) this.hudElement.remove();
     if (this.hotbarElement) this.hotbarElement.remove();
     if (this.contextPrompt) this.contextPrompt.remove();
     if (this.toastContainer) this.toastContainer.remove();
+    if (this.zoomStatus) this.zoomStatus.remove();
   }
 }

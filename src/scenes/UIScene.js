@@ -2,6 +2,10 @@ import { HUDController } from '../ui/HUDController.js';
 import { MenuController } from '../ui/MenuController.js';
 import { DialoguePanel } from '../ui/DialoguePanel.js';
 import { EventBus, EVENTS } from '../utils/EventBus.js';
+import { Phase4Panels } from '../ui/Phase4Panels.js';
+import { StorageRepo } from '../persistence/SaveRepository.js';
+import { LifePanels } from '../ui/LifePanels.js';
+import { WorldAtmosphere } from '../world/WorldAtmosphere.js';
 
 /**
  * UIScene
@@ -38,6 +42,9 @@ export class UIScene extends Phaser.Scene {
 
     // 1. Initialize HUD Controller
     this.hudController = new HUDController(appContainer, this.inventory, this.worldClock);
+    this.hudController.updateCoinsDisplay(this.gameScene.wallet.coins);
+    this.hudController.setSaveStatus({ state: StorageRepo.usingFallback ? 'session' : 'saved',
+      message: StorageRepo.usingFallback ? 'Progres hanya sesi ini' : this.gameScene.saveData.revision ? 'Tersimpan' : 'Belum tersimpan' });
 
     // 2. Initialize Menu Controller with input freeze callback & questSystem
     this.menuController = new MenuController(
@@ -47,6 +54,7 @@ export class UIScene extends Phaser.Scene {
       (isMenuOpen) => {
         if (this.gameScene && this.gameScene.inputRouter) {
           this.gameScene.inputRouter.setFrozen(isMenuOpen);
+          if (isMenuOpen) this.worldClock.freeze(); else this.worldClock.unfreeze();
         }
       },
       this.questSystem
@@ -63,6 +71,7 @@ export class UIScene extends Phaser.Scene {
       (isDialogueOpen) => {
         if (this.gameScene && this.gameScene.inputRouter) {
           this.gameScene.inputRouter.setFrozen(isDialogueOpen);
+          if (isDialogueOpen) this.worldClock.freeze(); else this.worldClock.unfreeze();
         }
       }
     );
@@ -85,19 +94,34 @@ export class UIScene extends Phaser.Scene {
     }
 
     // 4. Connect Contextual Action Prompt
-    EventBus.on(EVENTS.CONTEXT_ACTION_CHANGED, ({ target, prompt }) => {
+    this.unsubscribeContext = EventBus.on(EVENTS.CONTEXT_ACTION_CHANGED, ({ target, prompt }) => {
       this.hudController.setContextPrompt(prompt);
     });
 
     // 5. Expose showToast method
     this.showToast = (msg) => this.hudController.showToast(msg);
+    this.phase4Panels = new Phase4Panels(this.gameScene, this);
+    this.lifePanels = new LifePanels(this.gameScene, this.phase4Panels);
+    this.atmosphere = new WorldAtmosphere(this, this.gameScene);
+    document.getElementById('btn-open-pause').addEventListener('click', () => this.phase4Panels.openPause());
+    this.unsubscribeCoins = EventBus.on(EVENTS.COINS_CHANGED, ({ coins }) => this.hudController.updateCoinsDisplay(coins));
+    this.events.once('shutdown', () => this.shutdown());
   }
 
   update(time, deltaMs) {
-    // DOM HUD is event-driven
+    const dt = Math.min(deltaMs / 1000, 0.1);
+    this.lifePanels?.update(dt);
+    this.atmosphere?.update(dt);
+    if (this.gameScene?.cameraControls && this.hudController) {
+      this.hudController.setZoomDisplay(this.gameScene.cameraControls.targetZoom);
+    }
   }
 
   shutdown() {
+    this.unsubscribeContext?.();
+    this.unsubscribeCoins?.();
+    this.lifePanels?.destroy();
+    this.phase4Panels?.destroy();
     if (this.hudController) this.hudController.destroy();
     if (this.menuController) this.menuController.destroy();
     if (this.dialoguePanel) this.dialoguePanel.destroy();

@@ -1,69 +1,73 @@
 # Repository Guidelines
 
-Dokumen ini merupakan panduan arsitektur, standar teknis, dan spesifikasi komprehensif untuk pengembangan game **Seasons of Home (Lembah Rimbun)**. Dokumen ini dirancang sebagai acuan utama bagi pengembang manusia maupun *agentic AI code generator* agar memahami konteks sistem, desain arsitektur, dan konvensi kode secara utuh.
+Dokumen spesifikasi arsitektur teknis kanonikal untuk game **Seasons of Home (Lembah Rimbun)**. Dokumen ini dirancang sebagai *single source of truth* komprehensif bagi pengembang dan agen AI (*Agentic AI Code Generator*) untuk memahami konteks, struktur modul, alur data, konvensi kode, serta pedoman implementasi aplikasi secara menyeluruh.
 
 ---
 
 ## Project Overview
 
-- **Judul Game:** Seasons of Home (Lembah Rimbun)
-- **Genre:** Isometric Cozy Rural Life Simulation / Farming RPG
-- **Target Platform:** Web Modern (Desktop Canvas/WebGL & Layar Sentuh Mobile Responsif)
-- **Arsitektur Utama:** Zero-Build Single-Page Application (Vanilla ES Modules murni tanpa bundler runtime seperti Webpack/Vite untuk deployment statis instan).
-- **Filosofi & Nilai Inti:**
-  - **Cozy & Non-Violent:** Tanpa pertarungan, tanpa *time-pressure* yang menghukum, dan tanpa mekanik manipulatif.
-  - **Identitas Pedesaan Tropis:** Mengangkat estetika arsitektur panggung kayu, bebatuan kali, kebun terasering berundak, tanaman lokal (*Sunroot*, *Mossberry*, *Goldenleaf*), serta tradisi "Malam Lentera Panen".
-  - **Anti-AI-Slop Manifesto:** Melarang keras palet warna jenuh neon (`#FF0000`, `#00FF00`, `#0000FF`, dll.), gradien plastik murahan, atau filter blur artifisial. Semua visual disajikan dalam pixel-art terkurasi dengan penskalaan *nearest-neighbor* yang tajam.
-  - **Multi-Input Parity:** Menjamin pengalaman bermain yang setara antara Desktop (Keyboard/Mouse) dan Mobile (Virtual Touch D-pad & Contextual Action Button).
+**Seasons of Home (Lembah Rimbun)** adalah permainan simulasi kehidupan pedesaan isometrik 2D (*cozy rural life simulation*) yang terinspirasi oleh kekayaan budaya dan lanskap agrikultur Nusantara (Indonesia). 
+
+### Nilai Inti & Filosofi Desain:
+1. **Cozy, Restorative, & Non-Violent:** Tidak ada musuh, mekanik pertarungan, ancaman kematian, atau batas waktu yang menekan (*no timers/penalties*). Ritme permainan rileks dan meditatif.
+2. **Kekayaan Budaya Nusantara:** Menampilkan arsitektur pondok panggung kayu, dinding papan, genteng tanah liat bertingkat, sawah terasering berundak, komoditas lokal (*Sunroot*, *Mossberry*, *Goldenleaf*), serta tradisi perayaan syukur "Malam Lentera Panen".
+3. **Zero-Build Runtime Architecture:** Berjalan langsung di peramban web modern menggunakan Native ECMAScript Modules (ESM) murni tanpa ketergantungan runtime compiler, sekaligus menyediakan pipeline bundle statis mandiri (`dist/`) untuk deployment hosting ringan.
+4. **Anti-AI-Slop Visual Quality:** Mengacu ketat pada kurasi 14 palet warna alami (*earthy/warm*). Larangan keras penggunaan warna primer jenuh murni (`#FF0000`, `#00FF00`, `#0000FF`, `#FFFF00`), efek *neon glow*, *bloom* murahan, atau bentuk geometris primitif tanpa tekstur.
+5. **Robust Multi-Platform Support:** Mendukung kendali penuh desktop (keyboard, mouse, mouse-wheel zoom) serta layar sentuh mobile (Virtual D-pad, tombol aksi kontekstual, swipe hotbar) dengan penyesuaian dinamis terhadap berbagai rasio layar dan orientasi (*portrait/landscape*).
 
 ---
 
 ## Tech Stack
 
-| Layer | Teknologi / Modul | Deskripsi |
+| Lapisan / Komponen | Teknologi & Versi | Peran Teknis |
 |---|---|---|
-| **Game Engine** | Phaser 3.88.2 (`lib/phaser.min.js`) | Rendering 2D WebGL/Canvas, sprite atlas, frame animation, scene manager, dan camera follow. |
-| **Bahasa Pemrograman** | JavaScript ES2022+ (Native ES Modules) | Sintaks modular standar `import/export` dengan ekstensi `.js` eksplisit dan anotasi JSDoc bertipe ketat. |
-| **UI Presentation Layer** | DOM / Vanilla CSS (`src/styles/*.css`) | UI terisolasi di atas canvas melalui `UIScene` paralel; memanfaatkan CSS Variables (Design Tokens) untuk performa 60 FPS bebas lag. |
-| **State & Event Pipeline** | Custom EventBus (`src/utils/EventBus.js`) | Pola Observer pub/sub terdesentralisasi untuk komunikasi lintas sistem tanpa tight-coupling. |
-| **Data Persistence** | IndexedDB & JSON Storage Serialization | Sistem penyimpanan terisolasi 3-slot dengan skema versi dan migrasi data otomatis. |
-| **Automated Testing** | Node.js Test Runner & `node:assert` | Unit test suite cepat berbasis invariant matematika, state-machine, dan operasi transaksi inventaris. |
-| **Asset Pipeline** | Python 3.12 (Pillow / OpenCV) | Script slicing otomatis untuk memotong master spritesheet (1254×1254) menjadi frame atlas (313×313) dan potret dialog (256×256). |
+| **Core Game Engine** | [Phaser 3.88.2](https://phaser.io/) (Local Bundle) | Orkestrasi scene, render canvas 2D, kalkulasi camera viewport, loading tekstur & spritesheet |
+| **Language Standard** | JavaScript ECMAScript 2022+ (ESM) | Logika simulasi domain, modularitas murni tanpa transpilasi |
+| **UI Presentation Layer** | Vanilla HTML5 DOM + CSS3 Tokens | Layer antarmuka decoupled (`UIScene`), modal perkamen, hotbar, jurnal, panel interaksi |
+| **Persistence Layer** | IndexedDB API (`lembah-rimbun-db` v1) | Penyimpanan transaksional 3-slot independen, snapshot serialisasi, backup otomatis, toleransi korupsi |
+| **Audio Synthesizer** | Web Audio API Native (Procedural Synthesizer) | Efek suara interaksi halus (langkah, cangkul, air, tambang) berstatus autoplay-safe (resume on first user gesture) |
+| **Testing Suite** | Node.js Native Assert (`node:assert/strict`) + fake-indexeddb | 11 unit test suites invariant matematika, FSM, transaksi, dan snapshot roundtrip |
+| **Build & Preview Tooling** | Node.js ES Scripts (`scripts/build.mjs`, `scripts/serve.mjs`) | Generator bundle mandiri (`dist/`) dan server HTTP statis lokal |
 
 ---
 
 ## Design System
 
-### 1. Curated Earthy Palette (14 Warna Kurasi Resmi)
-Dilarang menggunakan hex warna di luar palet resmi berikut (didefinisikan di `src/config/palette.js` dan `src/styles/tokens.css`):
+Desain visual dan antarmuka mengacu pada sistem token CSS terpusat di `src/styles/tokens.css` dan `src/styles/ui.css`, yang mencerminkan palet kurasi anti-slop di `src/config/palette.js`.
 
-| Token CSS | Hex | Peran & Penggunaan |
+### 1. Palet Warna Kurasi (14-Color Earthy Palette)
+
+| Token CSS | Kode Hex | Penggunaan Desain |
 |---|---|---|
-| `--color-deep-pine` | `#304B43` | Warna dasar kanvas, tajuk pohon cemara, bayangan dalam, teks header penting. |
-| `--color-moss` | `#4C6B55` | Rumput liar, lumut batu, daun tanaman, lencana status selesai (*completed*). |
-| `--color-sage` | `#76936B` | Sorotan daun tropis, tunas muda, aksen tombol sekunder. |
-| `--color-dry-grass` | `#A6AB78` | Jerami kering, tepian jalan setapak, semak savana. |
-| `--color-warm-cream` | `#EEE1C4` | Latar kartu UI, lencana afeksi, teks tombol, warna busana katun. |
-| `--color-clay-brown` | `#87674E` | Bingkai jendela modal, kayu pagar, tiang pondok, batas slot inventaris. |
-| `--color-soil` | `#59483B` | Tanah gembur hasil cangkulan, bayangan kontak tanah entitas. |
-| `--color-terracotta` | `#BC7654` | Genteng tanah liat, tombol aksi utama (*primary button*), aksen peringatan. |
-| `--color-golden-straw` | `#D9AE6B` | Umbi Sunroot matang, lentera festival, mata koin Leafcoins. |
-| `--color-stone-slate` | `#697A77` | Bebatuan kali, dinding pondasi, bijih tambang. |
-| `--color-pond-blue` | `#749C9A` | Permukaan air Kolam Nila, pantulan langit air tenang. |
-| `--color-night-blue` | `#354D5C` | Langit malam hari, kabut bayangan senja. |
-| `--color-ui-ink` | `#2D3835` | Teks tubuh utama (*body text*), ikon interaksi, kontur luar pixel art. |
-| `--color-ui-parchment` | `#F2E8D5` | Permukaan kertas dokumen jurnal, kotak dialog, panel inventaris. |
+| `--soh-forest-deep` | `#223832` | Bingkai terluar UI, bayangan solid, teks kontras tinggi |
+| `--soh-forest-mid` | `#304B43` | Header panel modal, background tombol hover, lencana status |
+| `--soh-sage` | `#5B756C` | Indikator posisi valid furnitur, aksen teks sekunder |
+| `--soh-clay-bright` | `#D98A6C` | Sorotan aktif, seleksi hotbar, tombol aksi primer |
+| `--soh-clay-base` | `#BC7654` | Tombol standar, border kotak dialog, tombol konfirmasi |
+| `--soh-clay-dark` | `#8A523D` | Bayangan tombol tertekan, batas pemisah elemen |
+| `--soh-parchment` | `#F2E8D5` | Latar belakang utama kertas dialog, modal, dan tooltip |
+| `--soh-parchment-dark` | `#E1D3BA` | Latar belakang slot inventaris kosong, baris tabel selang-seling |
+| `--soh-gold-leaf` | `#DDAA55` | Ikon Leafcoins, rating bintang, lentera festival menyala |
+| `--soh-gold-dark` | `#B88432` | Bayangan elemen koin, batas lencana afeksi |
+| `--soh-terracotta` | `#A84B3D` | Peringatan bahaya, indikator penempatan furnitur terhalang |
+| `--soh-night-sky` | `#1A242B` | Overlay suasana malam hari, kanopi langit redup |
+| `--soh-wood-dark` | `#523B2B` | Bingkai kayu furnitur pondok, lis luar jendela |
+| `--soh-wood-mid` | `#87674E` | Dinding kayu pondok, papan lantai terasering |
 
-### 2. Geometri Isometrik (True 2:1 Diamond)
-- **Dimensi Dasar Ubin:** Lebar Ubin ($W$) = 64px, Tinggi Ubin ($H$) = 32px.
-- **Transformasi Proyeksi Matematika:**
-  $$\text{screenX} = (tx - ty) \times \frac{W}{2} = (tx - ty) \times 32$$
-  $$\text{screenY} = (tx + ty) \times \frac{H}{2} = (tx + ty) \times 16$$
-- **Transformasi Balik (Inverse Hit-Testing):**
-  $$tx = \frac{\text{screenX}}{W} + \frac{\text{screenY}}{H} = \frac{\text{screenX}}{64} + \frac{\text{screenY}}{32}$$
-  $$ty = \frac{\text{screenY}}{H} - \frac{\text{screenX}}{W} = \frac{\text{screenY}}{32} - \frac{\text{screenX}}{64}$$
-- **Depth Sorting Dinamis:**
-  $$\text{Depth} = 500 + \lfloor\text{screenFootY}\rfloor$$
+> [!IMPORTANT]
+> Dilarang keras menambahkan kode hex di luar palet resmi atau memakai warna primer murni (seperti `#FF0000`, `#00FF00`, `#0000FF`, `#FFFF00`) untuk menjaga estetika hangat pedesaan.
+
+### 2. Tipografi & Ukuran Interaktif
+- **Font Stack:** `'Segoe UI', -apple-system, BlinkMacSystemFont, 'Nunito', 'Segoe UI Emoji', sans-serif`
+- **Minimum Touch Target:** $\ge 44\text{px} \times 44\text{px}$ pada seluruh elemen yang dapat diklik atau disentuh (WCAG 2.1 Compliance).
+- **Z-Index Layering:**
+  - Canvas Phaser Game: `0`
+  - Dynamic Atmosphere / Night Overlay: `1`
+  - HUD Quick Bar & Clock: `10`
+  - Virtual Touch Controls (D-pad & Action): `15`
+  - Modal Menus (Tas, Jurnal, Kios, Bengkel): `20`
+  - Dialogue Box & Story Prompts: `25`
+  - System Alerts & Autosave Notifications: `30`
 
 ---
 
@@ -71,376 +75,383 @@ Dilarang menggunakan hex warna di luar palet resmi berikut (didefinisikan di `sr
 
 ```
 d:\GAME\SOH\
-├── index.html                   # Entry point aplikasi web, deklarasi viewport dan link stylesheet
-├── package.json                 # Metadata npm, konfigurasi ESM type module, dan script 'npm test'
-├── package-lock.json
-├── blueprint.md                 # Dokumen spesifikasi game design kanonikal (Source of Truth v1.0)
-├── task.md                      # Master tasklist WBS bertahap (Phase 0 hingga Phase 6)
-├── asset.md                     # Panduan kurasi dan spesifikasi pemotongan aset visual
-├── .gitignore                   # Mengabaikan node_modules, log, dan file sampah sistem
+├── index.html                       # Entry point aplikasi web & mounting canvas
+├── package.json                     # Konfigurasi skrip test, build, dan dependensi
+├── blueprint.md                     # Dokumen blueprint perancangan game v1.0
+├── task.md                          # Master WBS tasklist seluruh fase (Phase 0 - 6)
+├── AGENTS.md                        # Aturan pengembang & integrasi Agentic AI
+├── .gitignore                       # Berkas pengecualian git (termasuk dist/ & logs)
 │
-├── asset/                       # Direktori aset game yang telah di-slice dan terorganisasi
-│   ├── 1254x1254/               # Aset master mentah karakter dari sumber artwork
-│   ├── 1448x1086/               # Aset master mentah lingkungan dan bangunan
-│   ├── building/                # Tekstur bangunan (joni_cottage, bima_workshop, nara_stall, dll.)
-│   ├── characters/              # Spritesheet karakter 4x4 313x313 (joni, suri, bima, nara, kiko)
-│   │   └── portraits/           # Potret bust dialog 256x256 (*_bust.png)
-│   ├── crops/                   # Fase pertumbuhan tanaman stage 1 s/d 4 (sunroot, mossberry, goldenleaf)
-│   ├── items/                   # Ikon alat cangkul, penyiram, bibit, hasil panen, dan koin daun
-│   ├── nature/                  # Pepohonan tropis, semak, kayu tumbang, bijih tambang, lentera
-│   └── terrain/                 # Ubin rumput (grass_tile), jalan setapak (dirt_path), dermaga pancing
+├── asset/                           # Asset pipeline visual pixel-art
+│   ├── building/                    # Sprite eksterior & interior bangunan desa
+│   ├── characters/                  # Spritesheets karakter 4x4 (313x313) & busts
+│   ├── crops/                       # Sprite fase tumbuh tanaman (stage 1-4)
+│   ├── items/                       # Ikon alat tani, benih, komoditas, dan perabot
+│   ├── nature/                      # Pohon tropis, semak, mineral node, dan lentera
+│   └── terrain/                     # Ubin rumput, tanah garapan, jalur, dermaga
 │
-├── docs/                        # Dokumentasi teknis repositori
-│   └── specs.md                 # Spesifikasi sistem dan arsitektur repositori ini
+├── docs/                            # Dokumentasi teknis proyek
+│   ├── specs.md                     # Spesifikasi arsitektur komprehensif (dokumen ini)
+│   ├── task.md                      # Log checkpoint penyelesaian fase
+│   ├── changelog.md                 # Log riwayat perubahan berkelanjutan
+│   └── superpowers/plans/           # Arsip rencana teknis fase pengembangan
 │
-├── lib/                         # Pustaka eksternal offline mandiri
-│   └── phaser.min.js            # Phaser 3.88.2 production bundle
+├── lib/
+│   └── phaser.min.js                # Bundle lokal library Phaser 3.88.2
 │
-├── scripts/                     # Perkakas bantu Python untuk ekstraksi dan manipulasi aset
-│   ├── slice_transparent_assets.py
-│   └── test_slice.py
+├── scripts/                         # Otomasi build dan server lokal
+│   ├── build.mjs                    # Generator bundle produksi mandiri ke dist/
+│   └── serve.mjs                    # Server HTTP statis lokal berbasis Node.js
 │
-├── src/                         # Sumber kode aplikasi permainan (Vanilla ES Modules)
-│   ├── config/                  # Konfigurasi konstanta global
-│   │   ├── constants.js         # Konstanta grid, kecepatan gerak, waktu game, durasi musim
-│   │   └── palette.js           # Definisi palet warna 14-warna resmi anti-slop
+├── src/
+│   ├── main.js                      # Inisialisasi engine Phaser, config RESIZE & lifecycle
 │   │
-│   ├── data/                    # Konfigurasi data kanonikal game
-│   │   ├── crops.js             # Data varietas tanaman, siklus hari panen, dan hasil panen
-│   │   ├── items.js             # Katalog item, tipe alat, batas stack (99/1), harga jual
-│   │   ├── quests.js            # Data objektif 3 beat narasi ("Benih Pertama", dll.)
-│   │   └── npcDialogue.js       # Naskah percakapan bercabang Suri, Bima, dan Nara
+│   ├── config/                      # Parameter konstanta & palet anti-slop
+│   │   ├── constants.js             # Skala ubin (64x32), tick waktu, batas inventory
+│   │   └── palette.js               # Palet kurasi 14 warna kanonikal
 │   │
-│   ├── entities/                # Kelas entitas visual dan logika dunia
-│   │   ├── Player.js            # Entitas Joni: posisi fraksional, hadap 4-arah, animasi jalan/cangkul
-│   │   ├── NPC.js               # Entitas warga desa: animasi idle, hadap pemain, depth sorting
-│   │   └── FarmPlot.js          # Entitas petak kebun: status tanah (grass/tilled/watered), pertumbuhan
+│   ├── data/                        # Kamus data statis game
+│   │   ├── crops.js                 # Data varietas tanaman (Sunroot, Mossberry, Goldenleaf)
+│   │   ├── items.js                 # Kamus data 30+ item (alat, bibit, hasil, material)
+│   │   ├── npcDialogue.js           # Pohon percakapan narasi warga desa
+│   │   ├── quests.js                # Definisi 3 beat misi narasi utama
+│   │   └── recipes.js               # Resep crafting, cooking, dan alchemical dew
 │   │
-│   ├── input/                   # Subsistem kontrol multi-platform
-│   │   ├── InputRouter.js       # Penghubung abstraksi komando input dan status pembekuan (freeze)
-│   │   ├── DesktopInput.js      # Penanganan keyboard 8-arah (WASD/Panah), aksi E, menu I/J/Esc
-│   │   └── TouchControls.js     # Virtual D-pad dan tombol sentuh kontekstual responsif
+│   ├── entities/                    # Entitas dinamis dunia game
+│   │   ├── FarmPlot.js              # Entitas petak garapan sawah (3 state, 4 stage)
+│   │   ├── NPC.js                   # Entitas warga desa (Nara, Bima, Suri) & jadwal
+│   │   ├── Pet.js                   # Entitas pendamping Kiko (musang hutan)
+│   │   ├── Player.js                # Entitas protagonis (Joni) & state koordinat
+│   │   └── ResourceNode.js          # Entitas node mineral tambang & foraging
 │   │
-│   ├── scenes/                  # Siklus scene Phaser
-│   │   ├── BootScene.js         # Verifikasi lingkungan peramban dan IndexedDB
-│   │   ├── PreloadScene.js      # Pemuatan seluruh spritesheet, potret, audio, dan aset visual
-│   │   ├── TitleScene.js        # Menu utama game: Mulai Petualangan, Lanjutkan, Slot Simpan
-│   │   ├── GameScene.js         # Loop utama dunia gameplay: simulasi tanaman, waktu, kamera follow
-│   │   └── UIScene.js           # Scene overlay transparan untuk mengelola DOM HUD, dialog, dan modal
+│   ├── input/                       # Router masukan multi-platform
+│   │   ├── CameraControls.js        # Kontrol zoom keyboard (+/-), scroll wheel, & clamping
+│   │   ├── DesktopInput.js          # Pembaca keyboard WASD / Panah / Hotkeys
+│   │   ├── InputRouter.js           # Penggabung masukan semantik & pembekuan interaksi
+│   │   ├── ResponsiveViewport.js    # Sinkronisasi canvas RESIZE & ResizeObserver viewport
+│   │   └── TouchControls.js         # Virtual D-pad sentuh & tombol aksi kontekstual
 │   │
-│   ├── styles/                  # Lembar gaya CSS
-│   │   ├── tokens.css           # Variabel token warna palet, tipografi, dan scale
-│   │   └── ui.css               # Gaya tampilan HUD, Hotbar, Modal Tas, Dialog, dan Jurnal
+│   ├── persistence/                 # Arsitektur penyimpanan data IndexedDB
+│   │   ├── SaveManager.js           # Manajer serial autosave & sinkronisasi
+│   │   ├── SaveRepository.js        # Akses IndexedDB lembah-rimbun-db (3 slot)
+│   │   ├── SaveSerializer.js        # Serializer snapshot JSON murni bebas referensi siklis
+│   │   ├── SettingsRepository.js    # Penyimpanan pengaturan audio & preferensi kontrol
+│   │   └── migrations.js            # Pipeline migrasi skema data idempotent
 │   │
-│   ├── systems/                 # Modul sistem logika gameplay independen
-│   │   ├── MovementSystem.js    # Perhitungan vektor gerak 2D independen frame rate (deltaMs capped)
-│   │   ├── InteractionSystem.js # Seleksi target kedekatan interaktif kontekstual dan debouncing
-│   │   ├── InventorySystem.js   # Pengelolaan 16 slot tas, penggabungan stack, swap, serialisasi
-│   │   ├── FarmingSystem.js     # Logika pencangkulan, penyiraman, pergantian hari, proteksi panen
-│   │   ├── RelationshipSystem.js# Sistem nilai afeksi (0–100), sapaan harian (+2), tahapan sahabat
-│   │   ├── QuestSystem.js       # Finite State Machine quest, pelacak event, token imbalan idempoten
-│   │   └── DialogueSystem.js    # Orkestrasi percakapan bercabang dan pemicu aksi narasi
+│   ├── scenes/                      # State siklus hidup Phaser Scene
+│   │   ├── BootScene.js             # Pemeriksaan dependensi & deteksi IndexedDB
+│   │   ├── PreloadScene.js          # Pemuatan aset spritesheet, tekstur, & audio
+│   │   ├── TitleScene.js            # Scene menu awal, pemilihan 3 save slot
+│   │   ├── GameScene.js             # Orkestrator simulasi dunia aktif 36x36
+│   │   └── UIScene.js               # Scene DOM overlay paralel independen
 │   │
-│   ├── ui/                      # Komponen pengontrol antarmuka pengguna (DOM)
-│   │   ├── HUDController.js     # Jam dunia, cuaca, saldo koin, 4-slot hotbar, banner prompt
-│   │   ├── MenuController.js    # Modal 16-slot tas inventaris dan Jurnal Misi Lembah
-│   │   └── DialoguePanel.js     # Kartu dialog percakapan NPC dengan potret bust 128x128
+│   ├── styles/                      # Lembar gaya antarmuka
+│   │   ├── tokens.css               # Variabel CSS warna, spasi, radius, & bayangan
+│   │   └── ui.css                   # Tata letak HUD, modal, dialog, hotbar, & D-pad
 │   │
-│   ├── utils/                   # Utilitas umum
-│   │   ├── EventBus.js          # Pola pub/sub EventBus dan konstanta EVENTS kanonikal
-│   │   └── math.js              # Fungsi matematika kalkulasi jarak dan clamping
+│   ├── systems/                     # Subsistem logika domain simulasi
+│   │   ├── AudioSystem.js           # Synthesizer audio prosedural Web Audio API
+│   │   ├── CraftingSystem.js        # Sistem kerajinan bengkel Bima & validasi bahan
+│   │   ├── DecorationSystem.js      # Dekorasi interior pondok 6x6 & validasi grid
+│   │   ├── DialogueSystem.js        # Logika pohon dialog, respons, & update hubungan
+│   │   ├── EconomySystem.js         # Transaksi jual-beli Kios Nara & validasi atomik
+│   │   ├── FarmingSystem.js         # Logika cangkul, tanam, siram, tumbuh, & panen
+│   │   ├── FestivalSystem.js        # Event "Malam Lentera Panen" pasca misi narasi
+│   │   ├── FishingSystem.js         # Minigame memancing di dermaga Kolam Nila
+│   │   ├── InteractionSystem.js     # Deteksi radius kedekatan & penentu target prioritas
+│   │   ├── InventorySystem.js       # Manajemen tas 16 slot, stack merge, & swap
+│   │   ├── MovementSystem.js        # Perhitungan vektor gerak & two-axis collision sliding
+│   │   ├── PetSystem.js             # Kecerdasan buatan Kiko (breadcrumb follow & petting)
+│   │   ├── QuestSystem.js           # Finite State Machine misi & token idempoten
+│   │   ├── RelationshipSystem.js    # Skor afeksi warga (0-100) & sapaan harian
+│   │   ├── ResourceSystem.js        # Manajemen penambangan & reset harian sumber daya
+│   │   └── inventoryTransaction.js  # Utilitas mutasi transaksi inventaris atomik
 │   │
-│   └── world/                   # Fondasi dunia isometrik
-│       ├── isoMath.js           # Transformasi koordinat tileToScreen dan screenToTile
-│       ├── navGrid.js           # Grid collision 2D dengan sliding dua sumbu (two-axis sliding)
-│       ├── DepthSorter.js       # Pengurutan z-order dinamis berbasis tapak kaki (foot-y)
-│       ├── IsoWorldRenderer.js  # Render multi-layer tanah rumput, air kolam, petak, pohon, bangunan
-│       ├── WorldClock.js        # Siklus waktu 10-menit per hari game, musim, cuaca, dan advance day
-│       └── zoneDefinitions.js   # Definisi data dunia 32x32: posisi bangunan, ubin jalan, danau, NPC
+│   ├── ui/                          # Pengontrol antarmuka visual
+│   │   ├── DialoguePanel.js         # Kotak dialog warga & potret karakter
+│   │   ├── HUDController.js         # Indikator jam, musim, cuaca, saldo, & hotbar
+│   │   ├── LifePanels.js            # Panel minigame pancing, dapur, alchemical, & dekorasi
+│   │   ├── MenuController.js        # Pengendali pembukaan modal tas & jurnal
+│   │   ├── Phase4Panels.js          # Modal transaksi Kios Nara & Meja Kerajinan Bima
+│   │   ├── TitleMenu.js             # Menu utama interaktif (3 slot save, nama, busana)
+│   │   └── settingsView.js          # Panel kontrol volume suara & preferensi tampilan
+│   │
+│   ├── utils/                       # Utilitas matematika & pub/sub
+│   │   ├── EventBus.js              # Event dispatcher terpusat pemutus ketergantungan
+│   │   ├── math.js                  # Fungsi pembantu kalkulasi jarak & clamping
+│   │   └── rng.js                   # Pseudo-random number generator deterministik ber-seed
+│   │
+│   └── world/                       # Geometri & perenderan dunia isometrik
+│       ├── DepthSorter.js           # Dynamic z-ordering berbasis foot-Y layar
+│       ├── IsoWorldRenderer.js      # Perender multi-layer (tanah, entitas, kanopi)
+│       ├── LifeWorld.js             # Integrasi interaksi node dunia, pancing, & dekorasi
+│       ├── WorldAtmosphere.js       # Efek pencahayaan siang/malam & partikel cuaca
+│       ├── WorldClock.js            # Kalender siklus 24 jam, musim, cuaca, & tidur
+│       ├── isoMath.js               # Konversi matematis koordinat isometrik 2:1
+│       ├── navGrid.js               # Matriks collision dua sumbu 36x36
+│       └── zoneDefinitions.js       # Tata letak tata ruang desa Lembah Rimbun
 │
-└── tests/                       # Suite pengujian unit otomatis Node.js
-    ├── isoMath.test.js          # Uji akurasi bolak-balik proyeksi isometrik (toleransi ±1e-6)
-    ├── inventory.test.js        # Uji kapasitas inventaris, batas stack, dan penolakan saat penuh
-    ├── farming.test.js          # Uji siklus pertumbuhan tanaman dan proteksi pembatalan panen
-    └── quests.test.js           # Uji FSM quest, tangkapan domain event, dan token reward idempoten
+└── tests/                           # Pengujian unit otomatis invariant & FSM
+    ├── audio.test.js                # Uji synthesizer Web Audio API & gesture context
+    ├── browserPersistenceChecks.js  # Acceptance test IndexedDB asli di browser
+    ├── browserResponsiveChecks.js   # Acceptance test layout responsif & kontrol sentuh
+    ├── build.test.js                # Uji integritas bundle produksi mandiri (dist/)
+    ├── cameraControls.test.js       # Uji zoom kamera, batasan clamping, & deadzone
+    ├── farming.test.js              # Uji 4 siklus tanaman & proteksi panen aman
+    ├── inventory.test.js            # Uji batas stack 99, penolakan transaksi, & swap
+    ├── isoMath.test.js              # Invariant proyeksi koordinat 2:1 (toleransi ±1e-6)
+    ├── lifeSystems.test.js          # Uji gathering, fishing, crafting, & Kiko
+    ├── persistence.test.js          # Uji isolasi 3 slot, atomic rollback, & consent
+    ├── quests.test.js               # Uji FSM quest narasi & token reward idempoten
+    ├── save-roundtrip.test.js       # Uji serialisasi/deserialisasi snapshot murni
+    ├── transactions.test.js         # Uji atomisitas mutasi ekonomi & crafting
+    └── zoneLayout.test.js           # Uji konektivitas jalan desa & reachability NPC
 ```
 
 ---
 
 ## Workflow (Mermaid Charts)
 
-### 1. Scene Lifecycle & System Initialization
-Bagan alur inisialisasi lifecycle game dari boot awal hingga loop gameplay aktif:
+### 1. Game Lifecycle & Scene Management Flow
+Bagan alur inisialisasi engine, seleksi save slot, transisi scene aktif, dan orkestrasi parallel scene:
 
 ```mermaid
 flowchart TD
-    A[Peramban Membuka index.html] --> B[BootScene: Cek WebGL & Fitur Browser]
-    B --> C[PreloadScene: Pemuatan Spritesheet, Potret, Ubin, Bangunan]
-    C --> D[TitleScene: Tampilan Menu Utama & Slot Pemain]
-    D -->|Klik 'Mulai Petualangan'| E[Inisialisasi GameScene]
+    Start(["Mulai Aplikasi Web"]) --> Boot["BootScene: Deteksi Dukungan Browser & IndexedDB"]
+    Boot --> Preload["PreloadScene: Load Texture Cache, Spritesheets & Audio"]
+    Preload --> Title["TitleScene: Render TitleMenu (3 Save Slots, Nama, Busana)"]
     
-    subgraph GameScene Engine Loop
-        E --> F1[Inisialisasi NavGrid 32x32 & DepthSorter]
-        E --> F2[Inisialisasi InventorySystem 16-Slot]
-        E --> F3[Inisialisasi WorldClock & FarmingSystem]
-        E --> F4[Inisialisasi RelationshipSystem & QuestSystem]
-        E --> F5[Inisialisasi DialogueSystem]
-        E --> F6[IsoWorldRenderer: Bangun Medan, Jalan, Bangunan & Ubin Air]
-        E --> F7[Spawn Joni & Entitas NPC: Suri, Bima, Nara]
-    end
-
-    E -->|Launch Paralel dengan Data State| G[UIScene: DOM UI Shell]
+    Title -->|"Pilih Slot / Baru"| InitRepo["SaveRepository: Muat Snapshot / Buat Baru"]
+    InitRepo --> Game["GameScene: Bangun NavGrid 36x36, Spawning Entitas"]
+    Game --> LaunchUI["UIScene: Mount DOM HUD, Hotbar, Modal Container"]
     
-    subgraph UIScene DOM Shell
-        G --> H1[HUDController: Jam, Kalender, Koin, Hotbar 1-4]
-        G --> H2[MenuController: Modal Tas 16-Slot & Jurnal Misi]
-        G --> H3[DialoguePanel: Potret Bust 128x128 & Pilihan Respons]
+    subgraph ActiveGameplay ["Siklus Gameplay Aktif"]
+        Game <-->|"EventBus: Time, Weather, Inventory"| LaunchUI
+        Game -->|"Input Keyboard / Touch"| InputRouter["InputRouter: Semantic Command"]
+        InputRouter --> MoveSystem["MovementSystem: Two-Axis Collision Sliding"]
+        InputRouter --> InteractSystem["InteractionSystem: Contextual Action Detection"]
     end
-
-    GameScene Engine Loop <-->|EventBus & Input Freeze Bridge| UIScene DOM Shell
+    
+    ActiveGameplay -->|"Buka Menu / Dialog"| Freeze["WorldClock & InputRouter Frozen"]
+    Freeze -->|"Tutup Menu / Dialog"| Unfreeze["Resume Game Loop"]
 ```
 
----
-
-### 2. Real-Time Gameplay Update Loop
-Bagan eksekusi loop per frame (`GameScene.update`):
+### 2. Core Simulation Loop (Siklus Bertani, Warga, dan Malam Hari)
+Alur harian pemain dari pagi hingga malam hari:
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Player as Pemain (Input)
-    participant IR as InputRouter
-    participant MS as MovementSystem
-    participant NG as NavGrid
-    participant IS as InteractionSystem
-    participant FS as FarmingSystem
-    participant DS as DialogueSystem
-    participant DSort as DepthSorter
-    participant WC as WorldClock
-
-    Player->>IR: Kirim Vektor Gerak / Tombol Aksi [E]
-    IR->>WC: Update Waktu (deltaMs bounded <= 0.1s)
-    IR->>MS: Proses Vektor Gerak Joni
-    MS->>NG: Validasi Tumbukan Dua Sumbu (Two-Axis Sliding)
-    NG-->>MS: Posisi Terkoreksi (tileX, tileY)
+flowchart TD
+    Pagi["Pukul 06:00: Hari Baru Dimulai"] --> CuacaCheck{"Cek Cuaca Hari Ini"}
+    CuacaCheck -->|"Hujan"| AutoWater["FarmingSystem: Semua Petak Otomatis Tersiram"]
+    CuacaCheck -->|"Cerah / Berawan"| DrySoil["Tanah Mengering, Menunggu Disiram"]
     
-    IR->>IS: Update Deteksi Jarak Target Proksimitas
-    alt Ada Target Berdekatan (Petak Kebun)
-        IS-->>Player: Update Prompt HUD: "Siram Petak [E]"
-    else Ada Target Berdekatan (NPC)
-        IS-->>Player: Update Prompt HUD: "Bicara dengan Suri [E]"
+    AutoWater --> GrowPhase["Tanaman Maju 1 Growth Stage (Maks Stage 4)"]
+    DrySoil --> GrowPhase
+    GrowPhase --> RespawnNodes["ResourceSystem: Reset Titik Foraging & Tambang"]
+    
+    RespawnNodes --> PlayerAction["Aksi Pemain di Lembah Rimbun"]
+    
+    subgraph AktivitasPemain ["Aktivitas Harian Pemain"]
+        PlayerAction --> ActFarm["Mencangkul, Menanam Benih, Menyiram"]
+        PlayerAction --> ActGather["Mining Tambang (3 Pukulan) & Foraging"]
+        PlayerAction --> ActFish["Memancing Ikan di Dermaga Kolam Nila"]
+        PlayerAction --> ActSocial["Menyapa NPC Nara/Bima/Suri & Mengerjakan Misi"]
+        PlayerAction --> ActCraft["Crafting Alat di Bengkel atau Memasak di Dapur"]
+        PlayerAction --> ActPet["Mengelus Kiko (+3 Afeksi Harian)"]
     end
-
-    opt Pemain Menekan Tombol Aksi [E]
-        alt Target = Petak Kebun
-            IS->>FS: Eksekusi Aksi Cangkul / Tanam / Siram / Panen
-            FS-->>Player: Feedback Partikel & Toast Info
-        else Target = NPC
-            IS->>DS: Mulai Percakapan (startDialogue)
-            DS-->>Player: Tampilkan Kartu Dialog & Freeze Pergerakan
-        end
-    end
-
-    GameScene->>DSort: Update Z-Ordering Seluruh Entitas (500 + footY)
+    
+    AktivitasPemain --> Malam["Malam Tiba (Pukul 18:00): Suasana Meredup"]
+    Malam --> Kasur["Pemain Menuju Kasur Pondok & Menekan 'Tidur'"]
+    Kasur --> AutoSave["SaveManager: Serial Queue Snapshot Commit ke IndexedDB"]
+    AutoSave --> Pagi
 ```
 
----
-
-### 3. Agricultural Crop Lifecycle
-Bagan siklus hidup petak kebun dan tanaman:
+### 3. Atomic Transaction Workflow (Ekonomi & Crafting)
+Mekanisme pengamanan mutasi inventaris dan saldo koin untuk mencegah korupsi atau eksploitasi:
 
 ```mermaid
-stateDiagram-v2
-    [*] --> GrassPlot: Kondisi Alam Awal
-    GrassPlot --> TilledSoil: Dicangkul (tool_hoe)
+flowchart TD
+    TrxStart["Permintaan Transaksi (Beli / Jual / Kerajinan)"] --> Validate{"Validasi Pra-Syarat"}
     
-    state TilledSoil {
-        [*] --> DryTilled
-        DryTilled --> WateredTilled: Disiram (tool_watering_can)
-    }
-
-    DryTilled --> PlantedSeed: Ditanami Benih (Stage 1)
-    WateredTilled --> PlantedSeed: Ditanami Benih (Stage 1)
-
-    state PlantedSeed {
-        Stage1_Seed --> Stage2_Sprout: Berganti Hari + Disiram
-        Stage2_Sprout --> Stage3_Leaf: Berganti Hari + Disiram
-        Stage3_Leaf --> Stage4_Mature: Berganti Hari + Disiram
-    }
-
-    Stage4_Mature --> HarvestAttempt: Pemain Menekan [E]
+    Validate -->|"Gagal: Saldo Kurang / Item Kurang / Tas Penuh"| Rollback["Batalkan Transaksi (No State Changes)"]
+    Rollback --> ShowToast["Tampilkan Notifikasi Alasan Penolakan ke UI"]
     
-    state HarvestAttempt <<choice>>
-    HarvestAttempt --> HarvestSuccess: Inventaris Tersedia
-    HarvestAttempt --> HarvestBlocked: Inventaris Penuh (Safe Abort)
-
-    HarvestBlocked --> Stage4_Mature: Tanaman Tetap Utuh di Kebun
-    HarvestSuccess --> TilledSoil: Hasil Masuk Tas + Reset Petak
+    Validate -->|"Lolos Validasi"| CloneState["Buat Deep Clone Draft Inventaris"]
+    CloneState --> MutateDraft["Kurangi Bahan/Koin & Tambahkan Output ke Draft"]
+    
+    MutateDraft --> DoubleCheck{"Validasi Pasca-Mutasi"}
+    DoubleCheck -->|"Draft Tidak Konsisten"| Rollback
+    DoubleCheck -->|"Draft Valid"| CommitState["Atomic Commit: Terapkan Draft ke InventorySystem"]
+    
+    CommitState --> EmitEvent["Emit EventBus: TRANSACTION_COMPLETED"]
+    EmitEvent --> PlaySfx["AudioSystem: Putar SFX Koin / Dentang Bengkel"]
+    PlaySfx --> TriggerAutoSave["Trigger Autosave Checkpoint (Debounced)"]
 ```
 
----
-
-### 4. Quest State Machine & Idempotent Narrative Loop
-Bagan alur FSM sistem misi dan perlindungan imbalan idempoten:
+### 4. Persistence Architecture & Disaster Recovery Flow
+Alur penyimpanan data IndexedDB 3-slot dengan backup transaksional dan pemulihan korupsi:
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Locked: Misi Belum Terbuka
-    Locked --> Available: Syarat Terpenuhi / Misi Sebelumnya Selesai
+flowchart TD
+    SaveTrigger["Trigger Simpan (Tidur / Quest Selesai / Manual)"] --> Serialize["SaveSerializer: Ekstraksi Data Murni JSON Bebas Siklis"]
+    Serialize --> OpenTx["Buka Transaksi IndexedDB (readwrite)"]
     
-    Available --> Active: Pemain Menerima Dialog 'ACCEPT_QUEST'
+    OpenTx --> BackupStep["Tulis Snapshot Sebelumnya ke Store 'saveBackups'"]
+    BackupStep --> PrimaryStep["Tulis Snapshot Baru ke Store 'saveSlots'"]
     
-    state Active {
-        [*] --> TrackingObjectives
-        TrackingObjectives --> TrackingObjectives: Tangkap EventBus (PLOT_WATERED, CROP_HARVESTED, ITEM_ACQUIRED, NPC_TALKED)
-    }
-
-    TrackingObjectives --> Completed: Semua Target Objektif Terpenuhi
+    PrimaryStep --> CommitTx{"Transaksi Selesai (oncomplete)?"}
+    CommitTx -->|"Ya"| Success["Notifikasi: Permainan Tersimpan"]
+    CommitTx -->|"Gagal / Abort"| ErrorRollback["Rollback Transaksi, Pertahankan Data Lama"]
     
-    Completed --> Rewarded: Dialog Lapor 'CLAIM_REWARD' (Generate Token Unik)
+    LoadTrigger["Pemain Memuat Slot Permainan"] --> ReadPrimary["Baca Data dari 'saveSlots'"]
+    ReadPrimary --> SchemaCheck{"Integritas Skema Valid?"}
     
-    state Rewarded {
-        [*] --> TokenCheck
-        TokenCheck --> GrantRewards: Token Baru (Beri Koin, Item, Afeksi)
-        TokenCheck --> BlockDuplicate: Token Sudah Ada (Idempotent Abort)
-    }
+    SchemaCheck -->|"Valid"| RunMigrations["Jalankan Migrasi Idempoten (Jika Versi Skema Naik)"]
+    RunMigrations --> LoadWorld["Terapkan State ke GameScene"]
+    
+    SchemaCheck -->|"Korup / Tidak Valid"| AskConsent["Deteksi Kerusakan: Tampilkan Modal Konfirmasi Pemulihan"]
+    AskConsent -->|"Pemain Menyetujui"| RestoreBackup["Baca Cadangan dari 'saveBackups' & Pulihkan"]
+    RestoreBackup --> LoadWorld
+    AskConsent -->|"Pemain Menolak"| AbortLoad["Kembali ke Menu Utama"]
 ```
 
 ---
 
 ## Data Model (Mermaid Charts)
 
-Struktur kelas, entitas, dan hubungan relasi data game:
+### 1. Canonical GameState Entity-Relationship Diagram
+Struktur snapshot data lengkap yang disimpan ke dalam IndexedDB:
 
 ```mermaid
-classDiagram
-    class Player {
-        +number tileX
-        +number tileY
-        +string facing
-        +boolean active
-        +Sprite sprite
-        +playIdleAnimation()
-        +playActionAnimation(cb)
-        +getFootY() number
+erDiagram
+    GAME_STATE ||--|| PLAYER_STATE : contains
+    GAME_STATE ||--|| WORLD_STATE : contains
+    GAME_STATE ||--|| INVENTORY_STATE : contains
+    GAME_STATE ||--o{ FARM_PLOT_STATE : tracks
+    GAME_STATE ||--o{ NPC_RELATIONSHIP : records
+    GAME_STATE ||--|| QUEST_STATE : manages
+    GAME_STATE ||--|| PET_STATE : tracks
+    GAME_STATE ||--|| HOUSING_STATE : stores
+
+    PLAYER_STATE {
+        string name
+        int outfitId
+        float tileX
+        float tileY
+        string direction
+        int coins
     }
 
-    class NPC {
-        +string id
-        +string name
-        +string title
-        +number tileX
-        +number tileY
-        +string facing
-        +boolean active
-        +Sprite sprite
-        +facePlayer(px, py)
-        +playIdleAnimation()
-        +getFootY() number
+    WORLD_STATE {
+        int gameDay
+        int hour
+        int minute
+        string season
+        string weather
+        json zoneStates
+        boolean festivalActive
     }
 
-    class FarmPlot {
-        +string id
-        +number tileX
-        +number tileY
-        +string soilState
-        +string cropId
-        +number growthStage
-        +number plantedDay
-        +number wateredOnDay
-        +till()
-        +water(day)
-        +plant(cropId, day)
-        +harvest() object
-        +updateVisuals()
+    INVENTORY_STATE {
+        int capacity
+        json slots
     }
 
-    class InventorySystem {
-        +number capacity
-        +Array slots
-        +addItem(itemId, count) object
-        +removeItem(itemId, count) boolean
-        +hasItem(itemId, count) boolean
-        +getItemCount(itemId) number
-        +swapSlots(fromIdx, toIdx)
-        +serialize() object
-        +deserialize(data)
+    FARM_PLOT_STATE {
+        int plotId
+        string soilState
+        string cropId
+        int growthStage
+        int wateredOnDay
     }
 
-    class QuestSystem {
-        +Map questStates
-        +Set claimedRewardTokens
-        +startQuest(questId) boolean
-        +handleObjectiveProgress(id, count)
-        +claimReward(questId) object
-        +serialize() object
-        +deserialize(data)
+    NPC_RELATIONSHIP {
+        string npcId
+        int affectionScore
+        boolean talkedToday
+        json giftsGiven
     }
 
-    class RelationshipSystem {
-        +Map scores
-        +Set talkedToday
-        +recordDailyTalk(npcId) object
-        +addPoints(npcId, amount) number
-        +getPoints(npcId) number
-        +getStage(npcId) object
-        +onNewDay()
+    QUEST_STATE {
+        string activeQuestId
+        json completedQuestIds
+        json objectiveProgress
+        json claimedRewardTokens
     }
 
-    class WorldClock {
-        +number day
-        +string season
-        +string weather
-        +number timeOfDay
-        +update(deltaSec)
-        +advanceToMorning()
+    PET_STATE {
+        string name
+        int affection
+        int lastPettedDay
+        float tileX
+        float tileY
     }
 
-    class DialogueSystem {
-        +NPC currentNPC
-        +string currentQuestId
-        +startDialogue(npc)
-        +handleOptionSelect(option)
-        +closeDialogue()
+    HOUSING_STATE {
+        json placedObjects
+        json furnitureStorage
     }
+```
 
-    Player "1" -- "1" InventorySystem : Memiliki
-    GameScene "1" *-- "1" WorldClock : Mengelola
-    GameScene "1" *-- "1" FarmingSystem : Mengelola
-    FarmingSystem "1" *-- "12" FarmPlot : Memantau
-    GameScene "1" *-- "3" NPC : Mengorkestrasi
-    DialogueSystem --> QuestSystem : Memperbarui Status
-    DialogueSystem --> RelationshipSystem : Menambah Afeksi (+2, +8)
-    QuestSystem --> InventorySystem : Memberikan Hadiah
-    GameScene "1" *-- "1" DialogueSystem : Menjalankan
+### 2. Quest Narrative Finite State Machine
+Siklus hidup setiap beat misi narasi utama di `QuestSystem`:
+
+```mermaid
+stateDiagram-v2
+    [*] --> LOCKED: Misi Belum Terbuka
+    LOCKED --> AVAILABLE: Prasyarat Misi Sebelumnya Terpenuhi
+    AVAILABLE --> ACTIVE: Pemain Menerima Misi dari NPC
+    
+    ACTIVE --> ACTIVE: Progress Domain Events (PLOT_WATERED, HARVEST, CRAFT)
+    ACTIVE --> COMPLETED: Seluruh Objektif Tercapai (100%)
+    
+    COMPLETED --> REWARDED: Lapor Kembali ke NPC Terkait
+    note right of REWARDED: Diberikan Token Unik Idempoten\n(reward_token_questId)\nAnti Duplikasi
+    
+    REWARDED --> [*]: Buka Misi Berikutnya / Selesai
 ```
 
 ---
 
 ## Commands
 
-Panduan perintah operasional CLI untuk pengembangan, pengujian, dan eksekusi server:
+Panduan perintah operasional CLI pengembangan, eksekusi tes, dan pembuatan paket produksi:
 
 ```bash
-# 1. Menjalankan Seluruh Unit Test Suite (Automated Invariant & FSM Tests)
+# 1. Menjalankan Seluruh Automated Unit Test Suites (11 Test Suites Lengkap)
 npm test
 
-# 2. Menjalankan Tes Satuan Spesifik
-node tests/isoMath.test.js      # Uji transformasi koordinat isometrik
-node tests/inventory.test.js    # Uji kapasitas dan transaksi inventaris
-node tests/farming.test.js      # Uji siklus agrikultur dan proteksi panen
-node tests/quests.test.js       # Uji FSM quest, idempotensi, dan serialisasi
+# 2. Menjalankan Uji Bundle Produksi Mandiri
+npm run test:build
 
-# 3. Menjalankan Server Lokal Pengembangan (Port 8080)
+# 3. Menjalankan Uji Satuan Secara Spesifik
+node tests/isoMath.test.js          # Invariant proyeksi koordinat 2:1 (±1e-6)
+node tests/inventory.test.js        # Uji batas tumpukan 99 & slot swap/merge
+node tests/farming.test.js          # Uji siklus tanam 4 stage & proteksi panen aman
+node tests/quests.test.js           # Uji FSM quest narasi & token reward idempoten
+node tests/zoneLayout.test.js       # Uji konektivitas jalan desa & keterjangkauan NPC
+node tests/cameraControls.test.js   # Uji kontrol zoom & deadzone clamping
+node tests/transactions.test.js     # Uji mutasi atomik ekonomi & crafting
+node tests/save-roundtrip.test.js   # Uji integritas siklus snapshot JSON murni
+node tests/persistence.test.js      # Uji 3 slot IndexedDB & isolasi penghapusan
+node tests/lifeSystems.test.js      # Uji gathering, fishing, alchemy, & Kiko
+node tests/audio.test.js            # Uji synthesizer Web Audio API & gesture context
+
+# 4. Membangun Bundle Mandiri Produksi (Output ke direktori dist/)
+npm run build
+
+# 5. Menjalankan Server Preview dari Bundle Produksi (Port 8001)
+npm run preview
+
+# 6. Menjalankan Server Pengembangan Lokal Standar (Port 8080)
+npm start
+# Atau menggunakan modul Python bawaan:
 python -m http.server 8080 --directory "d:\GAME\SOH"
 
-# 4. Melakukan Git Remote Setup & Push ke GitHub
-git init
+# 7. Sinkronisasi Git & Push ke Remote Repository
 git add .
-git commit -m "feat: complete Phase 3 NPC, dialogue, quest FSM and 32x32 expanded world"
-git remote add origin https://github.com/tamaproject360/season-of-home.git
-git branch -M main
-git push -u origin main
+git commit -m "feat: complete Phase 0-6 systems and update master docs"
+git push origin main
 ```
 
 ---
@@ -448,77 +459,81 @@ git push -u origin main
 ## Code Style
 
 ### TypeScript & JSDoc Typing
-Meskipun proyek dieksekusi sebagai Vanilla ES Modules murni di peramban, seluruh kode wajib dilengkapi anotasi JSDoc standar TypeScript untuk memastikan *intellisense* dan kepatuhan arsitektur:
+Meskipun proyek dieksekusi sebagai Vanilla ES Modules murni di peramban tanpa build compiler, seluruh fungsi, metode kelas, dan modul publik wajib dilengkapi anotasi JSDoc standar TypeScript untuk menjamin *type safety*, kejelasan parameter, dan dokumentasi API:
 
 ```javascript
 /**
- * @typedef {Object} InteractionTarget
- * @property {'farm_plot' | 'npc' | 'door' | 'bed' | 'fishing' | 'crafting'} type
- * @property {string} prompt - Label aksi ramah pengguna (contoh: 'Cangkul Tanah [E]')
- * @property {number} priority - Nilai deterministik penentu prioritas interaksi
- * @property {Object} [npc] - Referensi entitas NPC jika bertipe 'npc'
- * @property {Object} [plot] - Referensi FarmPlot jika bertipe 'farm_plot'
+ * @typedef {Object} TransactionItem
+ * @property {string} itemId - Pengenal unik item dalam kamus items.js
+ * @property {number} quantity - Jumlah item yang terlibat dalam transaksi
  */
 
 /**
- * Memproses aksi kontekstual pemain terhadap target terdekat.
- * @param {Player} player
- * @param {string|null} activeItemId
- * @returns {{ success: boolean, action: string, message?: string }}
+ * Mengeksekusi transaksi pertukaran inventaris dan koin secara atomik.
+ * @param {InventorySystem} inventory - Referensi sistem inventaris pemain
+ * @param {number} currentCoins - Saldo Leafcoins saat ini
+ * @param {TransactionItem[]} itemsToRemove - Daftar item yang ditarik dari tas
+ * @param {TransactionItem[]} itemsToAdd - Daftar item yang ditambahkan ke tas
+ * @param {number} costInCoins - Total biaya koin (positif: bayar, negatif: terima uang)
+ * @returns {{ success: boolean, newCoins: number, errorReason?: string }}
  */
+export function executeInventoryTransaction(inventory, currentCoins, itemsToRemove, itemsToAdd, costInCoins) {
+  // Implementasi validasi atomik dan rollback...
+}
 ```
 
-### Components & Scene Architecture
-1. **Pemisahan Logika & Tampilan:** Logika permainan murni (*pure logic*) seperti FSM, kalkulasi inventaris, dan waktu dunia dilarang keras memanggil langsung API canvas Phaser. Seluruh komunikasi wajib melalui *event* atau nilai kembalian (*return values*).
-2. **Lifecycle Konsisten:** Setiap komponen UI atau pengontrol yang menyentuh DOM atau listener global wajib mengimplementasikan metode pembersihan `destroy()` atau `shutdown()` untuk mencegah *memory leak* saat scene di-restart.
+### Components
+1. **Pemisahan Logika & Presentasi (Decoupling):** Modul logika permainan (*pure logic*) dilarang memanggil langsung API canvas Phaser atau menyentuh elemen DOM. Seluruh koordinasi wajib melalui *return values* atau event broadcast melalui `EventBus`.
+2. **Pembersihan Bersih (Lifecycle Cleanup):** Setiap komponen yang mendaftarkan event listener DOM, interval timer, atau listener `EventBus` wajib menyediakan metode `destroy()` atau `cleanup()` guna mencegah kebocoran memori saat pergantian scene.
 
 ### Imports
-- Selalu gunakan format path relatif eksplisit yang mencantumkan ekstensi `.js`.
+- Selalu cantumkan ekstensi `.js` secara eksplisit pada setiap pernyataan `import`:
   ```javascript
   // BENAR:
-  import { tileToScreen } from '../world/isoMath.js';
+  import { tileToScreen, screenToTile } from '../world/isoMath.js';
   import { EventBus, EVENTS } from '../utils/EventBus.js';
 
-  // SALAH:
+  // SALAH (Menyebabkan runtime error pada native browser ESM):
   import { tileToScreen } from '../world/isoMath';
   ```
 
 ### Naming Conventions
-- **Kelas & Entitas:** `PascalCase` (contoh: `Player`, `QuestSystem`, `DialoguePanel`).
-- **Fungsi & Metode:** `camelCase` (contoh: `startQuest`, `resolveCollision`, `recordDailyTalk`).
-- **Konstanta & Event Enums:** `UPPER_SNAKE_CASE` (contoh: `QUEST_STATES`, `EVENTS.CROP_HARVESTED`).
-- **ID Data & Kunci Aset:** `snake_case` (contoh: `crop_sunroot`, `tool_watering_can`, `quest_beat_1`).
+- **Nama Kelas / Tipe / Enums:** `PascalCase` (contoh: `Player`, `InventorySystem`, `DialoguePanel`).
+- **Fungsi / Metode / Variabel:** `camelCase` (contoh: `resolveCollision`, `recordDailyTalk`, `activePlotId`).
+- **Konstanta Global / Event Names:** `UPPER_SNAKE_CASE` (contoh: `TILE_WIDTH`, `MAX_SLOTS`, `EVENTS.CROP_HARVESTED`).
+- **ID Item / Quest / Sprite Keys:** `snake_case` (contoh: `tool_hoe`, `crop_sunroot`, `quest_beat_1`).
 
-### Error Handling & Idempotency
+### Error Handling
 - **Idempotensi Wajib:** Setiap operasi pemberian reward naratif atau transaksi bernilai wajib dilindungi token unik. Jika operasi dieksekusi ulang, sistem wajib menolak secara aman tanpa memicu crash atau duplikasi saldo/item.
-- **Proteksi Null-Safety:** Jangan berasumsi data DOM atau data scene selalu tersedia saat *instantiation*. Gunakan pengecekan defensif `if (this.element) ...`.
-- **Debounced Interactions:** Seluruh interaksi tombol dan klik dunia wajib diberi *debouncing* (minimum 300ms) untuk mencegah eksploitasi ketukan ganda (*double-tap exploit*).
+- **Defensive Null-Safety:** Jangan berasumsi elemen DOM atau referensi entitas selalu ada. Lakukan validasi `if (!target) return;` sebelum memanipulasi objek.
+- **Debounced Interactions:** Seluruh tombol antarmuka dan interaksi klik pada canvas diberi waktu tenggang (*debouncing*) minimum 250–300ms untuk mencegah eksploitasi ketukan ganda (*double-tap glitch*).
 
 ---
 
 ## UI Components
 
 ### 1. HUD Controller (`src/ui/HUDController.js`)
-- **Kalender & Jam:** Menampilkan musim aktif (*Musim Semi*), urutan hari, indikator cuaca bergambar, serta jam format 24 jam (`06:00` s/d `24:00`).
-- **Saldo Koin:** Menampilkan saldo Leafcoins dinamis pemain dengan ikon daun keemasan.
+- **Kalender, Cuaca & Waktu:** Menampilkan musim aktif (*Musim Semi*), penanggalan hari, ikon cuaca (cerah/berawan/hujan), serta jam format 24 jam (`06:00` s/d `24:00`).
+- **Saldo Leafcoins:** Menampilkan jumlah koin aktif pemain secara real-time dengan ikon daun keemasan.
 - **4-Slot Quick Hotbar:** Menampilkan slot 1 s/d 4 di bagian bawah layar. Mendukung klik mouse, ketukan layar sentuh, atau hotkey keyboard `1`, `2`, `3`, `4`.
-- **Banner Tombol Aksi:** Mengambang di atas kepala karakter atau di kanan bawah untuk menampilkan label aksi kontekstual saat ini (contoh: `Siram Petak [E]`, `Bicara dengan Nenek Suri [E]`).
+- **Indikator Zoom Kamera:** Menampilkan persentase zoom saat ini (50% – 175%) dengan tombol cepat reset `[100%]`.
 
 ### 2. Dialogue Panel (`src/ui/DialoguePanel.js`)
-- **Letak & Gaya:** Mengambang di bagian bawah layar (`bottom: 24px`, lebar responsif maksimal 680px), bertema perkamen dengan bingkai kayu hangat.
-- **Panel Potret:** Bingkai kiri khusus berukuran 112×112 piksel merender potret bust karakter dengan penskalaan pixelated, disertai lencana status afeksi (contoh: `Sahabat Lembah (38 ♥)`).
-- **Panel Narasi:** Memuat nama karakter pembicara berhuruf tebal, gelar/profesi warga desa, serta teks percakapan 1–3 baris.
-- **Daftar Opsi Tanggapan:** Tombol pilihan respons bernomor `[1]`, `[2]` dengan tinggi sentuh $\ge 44\text{px}$. Mendukung navigasi keyboard instan (`1`-`9`, `Space`, `Enter`, `E`, `Esc`).
+- **Kotak Dialog Perkamen:** Mengambang di bagian bawah layar dengan tema kertas perkamen dan bingkai kayu hangat.
+- **Potret Karakter 128×128:** Menampilkan bust ekspresif karakter warga desa disertai lencana nama, profesi, dan skor afeksi (contoh: `Sahabat Lembah (38 ♥)`).
+- **Opsi Respons Bernomor:** Pilihan jawaban interaktif pemain dengan navigasi keyboard instan (`1`–`9`, `Space`, `Enter`, `E`, `Esc`).
 
-### 3. Inventory Modal (`src/ui/MenuController.js`)
-- **Grid 16 Slot (4×4):** Menampilkan inventaris tas Joni. Setiap slot menampilkan ikon item, jumlah tumpukan (*stack count* $\le 99$), dan status seleksi.
-- **Sistem Swap & Merge:** Klik slot pertama untuk memilih, klik slot kedua untuk menukar posisi (*swap*) atau menumpuk item identik (*stack merge*).
-- **Rincian Item:** Panel bawah menampilkan nama item, kategori, deskripsi lengkap, serta harga jual koin.
+### 3. Inventory & Quest Journal Modal (`src/ui/MenuController.js`)
+- **Tas 16 Slot (Grid 4×4):** Menampilkan inventaris lengkap pemain dengan dukungan klik untuk menukar (*swap*) posisi atau menggabungkan (*merge*) tumpukan hingga kapasitas 99.
+- **Jurnal Misi (`J`):** Menampilkan daftar misi aktif, ceklis pemenuhan objektif `[✓]`, dan rincian imbalan hadiah secara langsung.
 
-### 4. Quest Journal Modal (`src/ui/MenuController.js`)
-- **Daftar Misi Aktif & Tersedia:** Dibuka melalui tombol HUD `[📜 Jurnal (J)]` atau tombol keyboard `J`.
-- **Ceklis Objektif Real-Time:** Menampilkan indikator centang hijau `[✓]` untuk tugas yang telah selesai dan lingkaran `[○]` dengan penghitung fraksional target (contoh: `Sirami petak kebun yang ditanami (1/1)`).
-- **Status Lencana:** Menandai misi dengan status *Tersedia*, *Sedang Berjalan*, *Siap Lapor [✓]*, atau *Selesai*.
+### 4. Life & Production Panels (`src/ui/LifePanels.js` & `Phase4Panels.js`)
+- **Kios Pasar Nara:** Antarmuka jual-beli bibit, perkakas, dan hasil bumi secara atomik.
+- **Meja Kerajinan Bima:** Antarmuka crafting alat dengan pratinjau kebutuhan bahan dan validasi otomatis.
+- **Minigame Memancing Kolam Nila:** Panel kontrol tegangan tali pancing (tahan/lepas Spasi atau tombol sentuh) dengan indikator progress tangkapan deterministik.
+- **Dapur & Meja Alkimia:** Panel memasak sup herba, pai beri, dan peracikan tonik embun.
+- **Dekorasi Pondok (Grid 6×6):** Penempatan furnitur (karpet tenun, pot tanaman, rak) dengan pratinjau flat transparan (hijau sage jika valid, terakota merah jika terhalang kasur/pintu).
+- **Panel Pengaturan (`src/ui/settingsView.js`):** Kontrol slider volume suara (Master, Music, SFX), tombol Mute toggle, dan opsi ukuran tombol kontrol.
 
 ---
 
@@ -529,3 +544,4 @@ Meskipun proyek dieksekusi sebagai Vanilla ES Modules murni di peramban, seluruh
 3. **Pencegahan Gesture Bawaan Browser:** Panggilan `e.preventDefault()` aktif pada canvas game untuk mencegah *accidental page refresh*, *pinch-to-zoom*, atau scrolling yang tidak diinginkan saat bermain di perangkat mobile.
 4. **Input Focus & Movement Freeze:** Karakter dan waktu permainan secara otomatis dibekukan saat pemain sedang membuka dialog atau modal menu, memastikan pemain tidak kehilangan waktu atau tertabrak rintangan saat membaca narasi.
 5. **Keterbacaan Kontras Tinggi:** Warna teks gelap (`#2D3835`) di atas kertas perkamen terang (`#F2E8D5`) memberikan rasio kontras tinggi (>7:1) yang sangat nyaman dibaca tanpa melelahkan mata.
+6. **Autoplay-Safe Audio Bridge:** Web Audio API tidak memicu suara secara otomatis saat load halaman untuk mencegah browser policy rejection; konteks audio diinisialisasi secara anggun pada ketukan/interaksi pertama pengguna.
