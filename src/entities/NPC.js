@@ -88,6 +88,13 @@ export class NPC {
     return this.y;
   }
 
+  syncScreenPosition() {
+    const screenPos = tileToScreen(this.tileX, this.tileY);
+    this.x = screenPos.x;
+    this.y = screenPos.y;
+    this.sprite.setPosition(this.x, this.y);
+  }
+
   destroy() {
     if (this.sprite) {
       this.sprite.destroy();

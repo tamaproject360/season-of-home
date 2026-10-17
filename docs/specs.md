@@ -517,6 +517,7 @@ export function executeInventoryTransaction(inventory, currentCoins, itemsToRemo
 - **Saldo Leafcoins:** Menampilkan jumlah koin aktif pemain secara real-time dengan ikon daun keemasan.
 - **4-Slot Quick Hotbar:** Menampilkan slot 1 s/d 4 di bagian bawah layar. Mendukung klik mouse, ketukan layar sentuh, atau hotkey keyboard `1`, `2`, `3`, `4`.
 - **Indikator Zoom Kamera:** Menampilkan persentase zoom saat ini (50% – 175%) dengan tombol cepat reset `[100%]`.
+- **Toggle Sudut Kamera (`📷 [C]`):** Tombol pintas keyboard `C` dan tombol HUD `📷 [C]` untuk beralih instan antara sudut pandang **Isometrik 2:1** dan **Top-Down Ortogonal 2D** (`isometric` $\leftrightarrow$ `topdown`) dengan sinkronisasi posisi objek dunia dan pemain.
 
 ### 2. Dialogue Panel (`src/ui/DialoguePanel.js`)
 - **Kotak Dialog Perkamen:** Mengambang di bagian bawah layar dengan tema kertas perkamen dan bingkai kayu hangat.

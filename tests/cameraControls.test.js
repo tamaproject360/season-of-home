@@ -8,10 +8,13 @@ input.keyboard = new EventEmitter();
 const events = new EventEmitter();
 const camera = { zoom: 1, setZoom(value) { this.zoom = value; } };
 const scale = new EventEmitter();
-scale.width = 960; scale.height = 540;
-const scene = { input, events, scale, cameras: { main: camera }, inputRouter: { isFrozen: false } };
+let angleToggled = 0;
+const scene = { input, events, scale, cameras: { main: camera }, inputRouter: { isFrozen: false }, toggleCameraAngle: () => { angleToggled++; } };
 const controls = new CameraControls(scene);
 const key = (code, extra = {}) => input.keyboard.emit('keydown', { code, preventDefault() {}, ...extra });
+
+key('KeyC');
+assert.equal(angleToggled, 1, 'KeyC triggers toggleCameraAngle');
 
 input.emit('wheel', {}, [], 0, -100, 0);
 assert.ok(controls.targetZoom > 1, 'scroll up zooms in');
@@ -32,8 +35,10 @@ assert.equal(controls.targetZoom, 1.75, 'zoom in has an upper limit');
 key('Digit0');
 scene.inputRouter.isFrozen = true;
 key('Equal');
+key('KeyC');
 input.emit('wheel', {}, [], 0, -100, 0);
 assert.equal(controls.targetZoom, 1, 'menus and dialogue block camera input');
+assert.equal(angleToggled, 1, 'menus and dialogue block camera angle toggle');
 scene.inputRouter.isFrozen = false;
 key('Equal', { ctrlKey: true });
 assert.equal(controls.targetZoom, 1, 'browser shortcuts are left alone');

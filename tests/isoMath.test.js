@@ -61,4 +61,32 @@ const picked = worldScreenToTile(pointerX, pointerY, camera);
 assert.ok(Math.abs(picked.tx - 12.25) < 1e-6 && Math.abs(picked.ty - 8.5) < 1e-6,
   'pointer inversion must include zoom around the viewport center and camera offset');
 
+// Test 5: Top-Down Orthogonal 2D projection round-trip invariants
+import { setProjectionMode, getProjectionMode, PROJECTION_MODE } from '../src/world/isoMath.js';
+setProjectionMode(PROJECTION_MODE.TOPDOWN);
+assert.strictEqual(getProjectionMode(), 'topdown');
+
+const topdownCoords = [
+  { tx: 0, ty: 0 },
+  { tx: 5.5, ty: 12.25 },
+  { tx: -3.5, ty: 8.75 },
+  { tx: 22, ty: 18 }
+];
+
+for (const coord of topdownCoords) {
+  const screen = tileToScreen(coord.tx, coord.ty);
+  const back = screenToTile(screen.x, screen.y);
+  assert(Math.abs(back.tx - coord.tx) < 1e-6, `TopDown tx mismatch: ${back.tx} vs ${coord.tx}`);
+  assert(Math.abs(back.ty - coord.ty) < 1e-6, `TopDown ty mismatch: ${back.ty} vs ${coord.ty}`);
+}
+
+const tdOffset = tileToScreen(4, 7, 100, 200);
+const tdBack = screenToTile(tdOffset.x, tdOffset.y, 100, 200);
+assert(Math.abs(tdBack.tx - 4) < 1e-6 && Math.abs(tdBack.ty - 7) < 1e-6);
+
+// Reset back to isometric default
+setProjectionMode(PROJECTION_MODE.ISOMETRIC);
+assert.strictEqual(getProjectionMode(), 'isometric');
+console.log('✓ Test 5 Passed: Top-Down Orthogonal projection round-trip invariants');
+
 console.log('All isoMath tests PASSED successfully!\n');

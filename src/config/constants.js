@@ -8,7 +8,13 @@ export const VIEWPORT = {
 
 export const TILE = {
   WIDTH: 64,
-  HEIGHT: 32
+  HEIGHT: 32,
+  ORTHO_SIZE: 48
+};
+
+export const CAMERA_MODE = {
+  ISOMETRIC: 'isometric',
+  TOPDOWN: 'topdown'
 };
 
 export const GAMEPLAY = {

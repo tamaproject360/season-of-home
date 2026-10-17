@@ -23,6 +23,7 @@ import { DEFAULT_SETTINGS, applySettings } from '../persistence/SettingsReposito
 import { EventBus, EVENTS } from '../utils/EventBus.js';
 import { LifeWorld } from '../world/LifeWorld.js';
 import { AudioSystem } from '../systems/AudioSystem.js';
+import { getProjectionMode, setProjectionMode, PROJECTION_MODE } from '../world/isoMath.js';
 
 /**
  * GameScene
@@ -227,5 +228,37 @@ export class GameScene extends Phaser.Scene {
 
     // 6. Update depth sorting based on foot-y
     this.depthSorter.update();
+  }
+
+  toggleCameraAngle() {
+    const currentMode = getProjectionMode();
+    const newMode = currentMode === PROJECTION_MODE.ISOMETRIC ? PROJECTION_MODE.TOPDOWN : PROJECTION_MODE.ISOMETRIC;
+    setProjectionMode(newMode);
+
+    // 1. Refresh world renderer (terrain, roads, plots, buildings, trees)
+    if (this.worldRenderer?.refreshProjection) {
+      this.worldRenderer.refreshProjection(newMode);
+    }
+
+    // 2. Synchronize player position
+    this.player?.syncScreenPosition?.();
+
+    // 3. Synchronize NPCs and Pet
+    for (const npc of this.npcs || []) {
+      npc.syncScreenPosition?.();
+    }
+    if (this.lifeWorld?.pet) {
+      this.lifeWorld.pet.syncScreenPosition?.();
+    }
+
+    // 4. Center camera on player in new coordinates
+    if (this.cameras?.main && this.player) {
+      this.cameras.main.centerOn(this.player.x, this.player.y);
+    }
+
+    // 5. Emit event for HUD and audio feedback
+    if (this.audio) this.audio.play('hoe');
+    EventBus.emit(EVENTS.CAMERA_ANGLE_CHANGED, { mode: newMode });
+    return newMode;
   }
 }
